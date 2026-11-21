@@ -46,25 +46,12 @@ jobs:
       - name: Smoke test (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run -a npm run smoke --prefix desktop
-      - name: Smoke test the Windows portable launcher with inherited package ACLs
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $portableTemp = Join-Path $env:RUNNER_TEMP 'baize-portable-acl-test'
-          New-Item -ItemType Directory -Path $portableTemp | Out-Null
-          $acl = Get-Acl -LiteralPath $portableTemp
-          $acl.SetAccessRuleProtection($true, $true)
-          foreach ($rule in @($acl.Access)) {
-            $sid = $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value
-            if ($sid -in @('S-1-15-2-1', 'S-1-15-2-2')) { $acl.RemoveAccessRuleSpecific($rule) }
-          }
-          $packageSid = [System.Security.Principal.SecurityIdentifier]::new('S-1-15-2-123456789-234567890-345678901-456789012-567890123-678901234-789012345')
-          $acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new($packageSid, 'ReadAndExecute', 'ContainerInherit,ObjectInherit', 'None', 'Allow'))
-          Set-Acl -LiteralPath $portableTemp -AclObject $acl
-          $env:TEMP = $portableTemp
-          $env:TMP = $portableTemp
-          $env:BAIZE_SMOKE_EXECUTABLE = (Resolve-Path 'release/*-portable.exe').Path
-          npm run smoke --prefix desktop
+      - name: Install and launch each final package (Windows and macOS)
+        if: runner.os != 'Linux'
+        run: node desktop/test-packages.cjs
+      - name: Install and launch each final package (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a node desktop/test-packages.cjs
       - name: Inspect packaged files
         run: node desktop/audit.cjs
       - name: Verify build outputs stay out of Git

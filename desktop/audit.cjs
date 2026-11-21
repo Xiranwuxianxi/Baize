@@ -4,7 +4,7 @@ const { listPackage } = require('@electron/asar')
 const { applicationPaths } = require('./locations.cjs')
 
 const { resources } = applicationPaths()
-const allowed = new Set(['package.json', 'main.cjs', 'lib', 'lib/backend.cjs', 'lib/policy.cjs'])
+const allowed = new Set(['package.json', 'main.cjs', 'lib', 'lib/backend.cjs', 'lib/policy.cjs', 'assets', 'assets/icon.png', 'loading.html', 'loading.css'])
 for (const entry of listPackage(path.join(resources, 'app.asar'))) {
   const name = entry.replaceAll('\\', '/').replace(/^\//, '')
   if (!allowed.has(name)) throw new Error(`Unexpected desktop application file: ${name}`)

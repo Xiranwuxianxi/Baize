@@ -27,8 +27,17 @@ async function main() {
     path.join(__dirname, 'backend.spec')])
   const targets = process.argv.includes('--dir') ? Platform.current().createTarget('dir') : undefined
   await build({ projectDir: __dirname, config: require('./electron-builder.cjs'), targets,
-    effectiveOptionComputed: require('./nsis-options.cjs'),
+    effectiveOptionComputed: process.platform === 'win32' ? require('./nsis-options.cjs') : undefined,
   })
+  if (!process.argv.includes('--dir')) {
+    const output = path.resolve(__dirname, process.env.BAIZE_DESKTOP_OUTPUT || '../release')
+    const files = fs.readdirSync(output)
+    const suffixes = process.platform === 'win32' ? ['-setup.exe', '-portable.exe']
+      : process.platform === 'darwin' ? ['.dmg', '.zip'] : ['.AppImage', '.deb']
+    for (const suffix of suffixes) {
+      if (!files.some(file => file.endsWith(suffix))) throw new Error(`Missing desktop package: ${suffix}`)
+    }
+  }
 }
 
-main().catch(error => { console.error(error); process.exitCode = 1 })
+main().catch(error => { console.error(error); process.exit(1) })

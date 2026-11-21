@@ -11,6 +11,7 @@ let backend
 let quitting = false
 let stopped = false
 let smokeHome
+let startupWindow
 
 app.setName('Baize')
 // Chromium must not create files in Baize's data home before legacy migration.
@@ -51,11 +52,17 @@ if (!app.requestSingleInstanceLock()) {
     contents.on('will-attach-webview', event => event.preventDefault())
   })
 
-  async function createWindow() {
-    const window = new BrowserWindow({
+  function newWindow() {
+    return new BrowserWindow({
       title: '白泽 Baize', width: 1320, height: 900, minWidth: 900, minHeight: 640,
+      icon: path.join(__dirname, 'assets/icon.png'),
       show: false, backgroundColor: '#111827', webPreferences: preferences,
     })
+  }
+
+  async function createWindow() {
+    const window = startupWindow && !startupWindow.isDestroyed() ? startupWindow : newWindow()
+    startupWindow = undefined
     await window.loadURL(backend.origin)
     if (smoke) {
       const rendered = await window.webContents.executeJavaScript(`new Promise(resolve => {
@@ -86,6 +93,11 @@ if (!app.requestSingleInstanceLock()) {
       ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : [{ label: 'File', submenu: [{ role: 'quit' }] }]),
       { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
     ]))
+    if (!smoke) {
+      startupWindow = newWindow()
+      await startupWindow.loadFile(path.join(__dirname, 'loading.html'))
+      startupWindow.show()
+    }
     backend = await startBackend({ packaged: app.isPackaged, resourcesPath: process.resourcesPath, root,
       logPath: path.join(app.getPath('logs'), 'desktop-backend.log'),
       portFile: path.join(app.getPath('userData'), 'backend-port.json'),
