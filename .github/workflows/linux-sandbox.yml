@@ -1,0 +1,39 @@
+name: Linux package sandbox check
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful desktop package run to verify
+        required: true
+        default: '44944848838'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+          name: Baize-linux-x64
+          path: release
+      - name: Launch AppImage with the production sandbox enabled
+        run: |
+          appimage=("$PWD"/release/*.AppImage)
+          chmod +x "${appimage[0]}"
+          CI= APPIMAGE_EXTRACT_AND_RUN=1 BAIZE_SMOKE_EXECUTABLE="${appimage[0]}" xvfb-run -a node desktop/smoke.cjs
+      - name: Install and launch DEB with the production sandbox enabled
+        run: |
+          sudo apt-get install -y "$PWD"/release/*.deb
+          trap 'sudo apt-get remove -y baize-desktop' EXIT
+          CI= BAIZE_SMOKE_EXECUTABLE=/opt/Baize/Baize xvfb-run -a node desktop/smoke.cjs
