@@ -24,6 +24,12 @@ chmod +x Baize-0.1.0-linux-x86_64.AppImage
 ./Baize-0.1.0-linux-x86_64.AppImage
 ```
 
+On Debian/Ubuntu, install the DEB with:
+
+```sh
+sudo apt install ./Baize-0.1.0-linux-amd64.deb
+```
+
 Windows release signing is not configured. macOS apps are ad-hoc signed and are not notarized. The operating system may display a source-verification prompt.
 
 ## First launch

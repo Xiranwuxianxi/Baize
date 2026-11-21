@@ -26,6 +26,12 @@ chmod +x Baize-0.1.0-linux-x86_64.AppImage
 ./Baize-0.1.0-linux-x86_64.AppImage
 ```
 
+Debian / Ubuntu 可安装 DEB：
+
+```sh
+sudo apt install ./Baize-0.1.0-linux-amd64.deb
+```
+
 当前 Windows 包尚未使用发行证书签名，macOS 为临时签名且尚未经过 Apple 公证。系统可能显示来源提示；这些包尚不等同于经过签名、公证和应用商店审核的正式发行包。
 
 ## 第一次启动
