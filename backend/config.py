@@ -12,7 +12,13 @@ import shutil
 import sys
 from typing import Any, Dict, List
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+def _resource_root() -> str:
+    if getattr(sys, "frozen", False):
+        return os.path.abspath(sys._MEIPASS)
+    return os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+
+
+ROOT = _resource_root()
 APP_NAME = "Baize"  # 白泽。曾用名 MultiAgentsControl，旧数据目录启动时自动搬过来（见 _migrate_legacy）
 APP_SLUG = "baize"
 LEGACY_APP_NAME = "MultiAgentsControl"

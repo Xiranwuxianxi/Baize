@@ -1,0 +1,20 @@
+{
+  "name": "baize-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baize desktop console with its own Python backend",
+  "author": "Xiranwuxianxi",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build": "node build.cjs",
+    "pack": "node build.cjs --dir",
+    "smoke": "node smoke.cjs",
+    "check": "node --check main.cjs && node --check lib/backend.cjs && node --test test/*.test.cjs"
+  },
+  "devDependencies": {
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0"
+  }
+}

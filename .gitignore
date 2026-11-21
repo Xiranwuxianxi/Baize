@@ -10,9 +10,19 @@ __pycache__/
 *.py[cod]
 
 # Node
-frontend/node_modules/
+node_modules/
 frontend/dist/
 npm-debug.log*
+
+# Desktop builds: sources and lockfiles are tracked; generated files are not.
+/.desktop-build/
+/release/
+/dist/
+/build/
+/desktop/.cache/
+*.pfx
+*.p12
+*.log
 
 # 编辑器与系统
 .vscode/

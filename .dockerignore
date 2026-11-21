@@ -13,4 +13,7 @@ backend/.venv
 **/__pycache__
 frontend/node_modules
 frontend/dist
+.desktop-build
+release
+desktop
 .dev-home

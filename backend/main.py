@@ -39,7 +39,7 @@ import orchestra
 from orchestra import approvals, run_conversation, strip_agent_tags
 
 HOST, PORT = config.HOST, config.PORT
-DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+DIST = os.path.join(config.ROOT, "frontend", "dist")
 
 with open(os.path.join(config.ROOT, "VERSION"), encoding="utf-8") as _version_file:
     VERSION = _version_file.read().strip()

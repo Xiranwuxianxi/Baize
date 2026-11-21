@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "__pycache__", ".pytest_cache", ".claude", ".idea", ".vscode", ".dev-home"}
+SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "__pycache__", ".pytest_cache", ".claude", ".idea", ".vscode", ".dev-home", ".desktop-build", "release"}
 PERSONAL_NAMES = {".env", "config.yaml"}
 PERSONAL_DIRS = {"data", "workspace"}
 PERSONAL_EXT = (".db", ".sqlite", ".sqlite3", ".db-journal", ".db-wal")
@@ -30,7 +30,7 @@ KEY_PATTERNS = [
     re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}"),             # GitHub
     re.compile(r"hf_[A-Za-z0-9]{30,}"),                    # Hugging Face
 ]
-TEXT_EXT = (".py", ".js", ".jsx", ".ts", ".tsx", ".json", ".md", ".yml", ".yaml", ".toml", ".txt", ".html", ".css",
+TEXT_EXT = (".py", ".js", ".cjs", ".spec", ".jsx", ".ts", ".tsx", ".json", ".md", ".yml", ".yaml", ".toml", ".txt", ".html", ".css",
             ".sh", ".bat", ".cfg", ".ini", ".env", ".example", "Dockerfile", ".lock")
 
 

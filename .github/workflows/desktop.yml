@@ -1,0 +1,64 @@
+name: Desktop packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: windows-x64, os: windows-latest }
+          - { name: linux-x64, os: ubuntu-22.04 }
+          - { name: macos-arm64, os: macos-latest }
+          - { name: macos-x64, os: macos-15-intel }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            frontend/package-lock.json
+      - run: python -m pip install -r desktop/requirements-build.txt
+      - run: npm ci --prefix desktop --no-fund --no-audit
+      - run: npm run check --prefix desktop
+      - name: Build desktop packages
+        run: npm run build --prefix desktop
+        env:
+          BAIZE_BUILD_PYTHON: python
+      - name: Smoke test (Windows and macOS)
+        if: runner.os != 'Linux'
+        run: npm run smoke --prefix desktop
+      - name: Smoke test (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run smoke --prefix desktop
+      - name: Inspect packaged files
+        run: node desktop/audit.cjs
+      - name: Verify build outputs stay out of Git
+        run: python -c "import subprocess; out = subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=all'], text=True); assert not out.strip(), out"
+      - name: Upload installers only
+        uses: actions/upload-artifact@v4
+        with:
+          name: Baize-${{ matrix.name }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
