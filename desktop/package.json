@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "description": "Baize desktop console with its own Python backend",
+  "homepage": "https://github.com/Xiranwuxianxi/Baize",
+  "desktopName": "com.xiranwuxianxi.baize.desktop",
   "author": "Xiranwuxianxi",
   "license": "MIT",
   "main": "main.cjs",

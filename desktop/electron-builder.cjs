@@ -29,6 +29,7 @@ module.exports = {
     // In electron-builder 26, true uses each launcher's unique $PLUGINSDIR.
     // A second click must not delete the first instance's program directory.
     unpackDirName: true,
+    splashImage: 'assets/portable-splash.bmp',
   },
   mac: {
     target: ['dmg', 'zip'], category: 'public.app-category.developer-tools',
@@ -38,6 +39,7 @@ module.exports = {
   },
   linux: {
     target: ['AppImage', 'deb'], category: 'Development',
+    syncDesktopName: true,
     icon: 'assets/icon.png',
     artifactName: 'Baize-${version}-linux-${arch}.${ext}',
     maintainer: 'Xiranwuxianxi',
