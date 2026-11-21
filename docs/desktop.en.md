@@ -83,6 +83,8 @@ The runtime uses an explicit file inclusion list. Private databases, `.env`, `co
 
 ## Troubleshooting
 
+- **Windows portable exits immediately:** inherited permissions on some Windows temporary folders can prevent Electron's sandbox from reading the extracted application. The launcher grants application packages read/execute access to the program directory before launch. It leaves user data permissions unchanged and keeps the sandbox enabled. Download a new build instead of reusing the old portable executable. CI launches the final portable EXE under a temporary directory with inherited package permissions and checks that the interface renders.
+
 - **No artifacts or expired download:** sign in to GitHub and open a successful run. Regenerate the packages as a maintainer, build locally, or build in a fork.
 - **Startup error:** check the CPU architecture and fully extract the package. Do not copy only one executable out of an unpacked application directory. The backend log is `desktop-backend.log`; on macOS it is under `~/Library/Logs/Baize/`, and on Windows/Linux it is inside the Electron profile's log directory.
 - **No models:** configure a provider and check its endpoint, key and model name, or start the local model server.

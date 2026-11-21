@@ -1,5 +1,6 @@
 ; Chromium's restricted processes need read access to the application files.
 ; Apply this only to the extracted/installed program, never to user data.
+!ifndef BUILD_UNINSTALLER
 Function BaizeGrantSandboxReadAccess
   nsExec::ExecToStack '"$SYSDIR\icacls.exe" "$INSTDIR" /grant "*S-1-15-2-1:(OI)(CI)(RX)"'
   Pop $R0
@@ -20,3 +21,4 @@ FunctionEnd
 !macro customFiles_ia32
   Call BaizeGrantSandboxReadAccess
 !macroend
+!endif
