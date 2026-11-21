@@ -13,6 +13,12 @@ let stopped = false
 let smokeHome
 
 app.setName('Baize')
+// Chromium must not create files in Baize's data home before legacy migration.
+if (!smoke) {
+  const profile = path.join(app.getPath('appData'), 'BaizeDesktop')
+  fs.mkdirSync(profile, { recursive: true })
+  app.setPath('userData', profile)
+}
 if (smoke) {
   smokeHome = process.env.BAIZE_SMOKE_HOME || fs.mkdtempSync(path.join(os.tmpdir(), 'baize-desktop-smoke-'))
   fs.mkdirSync(path.join(smokeHome, 'electron'), { recursive: true })
