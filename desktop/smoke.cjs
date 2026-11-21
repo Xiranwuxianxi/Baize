@@ -7,7 +7,7 @@ const { applicationPaths } = require('./locations.cjs')
 
 const executable = process.env.BAIZE_SMOKE_EXECUTABLE || applicationPaths().executable
 if (!fs.existsSync(executable)) throw new Error(`Build the desktop app first: ${executable}`)
-const args = ['--smoke-test', ...(process.env.CI && process.platform === 'linux' ? ['--no-sandbox'] : [])]
+const args = ['--smoke-test']
 const smokeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'baize-desktop-smoke-'))
 const child = spawn(executable, args, { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, env: { ...process.env, BAIZE_SMOKE_HOME: smokeHome } })
 let passed = false

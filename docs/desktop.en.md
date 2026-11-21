@@ -17,12 +17,16 @@ Sign in to GitHub, open the **Desktop packages** workflow, choose a successful r
 
 [Verified build with the new logo and naming story](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838): all four native jobs passed, producing eight final distribution files. Download its artifacts within 30 days. For later builds, select a run where all four jobs passed.
 
+An additional [Linux sandbox check](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) confirmed that both packages render and exit without `--no-sandbox`.
+
 On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, make the AppImage executable:
 
 ```sh
 chmod +x Baize-0.1.0-linux-x86_64.AppImage
 ./Baize-0.1.0-linux-x86_64.AppImage
 ```
+
+The tested extract-and-run alternative is `APPIMAGE_EXTRACT_AND_RUN=1 ./Baize-0.1.0-linux-x86_64.AppImage`.
 
 On Debian/Ubuntu, install the DEB with:
 

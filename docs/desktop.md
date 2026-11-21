@@ -12,6 +12,8 @@
 
 [新图标与命名说明已验证构建](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838)：Windows、两种 Mac 架构及 Linux 四个任务全部通过，提供 8 个最终安装文件。下载其中的 Artifacts，产物保留 30 天。后续版本仍可从上方构建页面选择四项均成功的运行。
 
+[Linux 沙箱启动复核](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) 另外确认了这批 AppImage 和 DEB 在不传入 `--no-sandbox` 时可以加载界面并正常退出。
+
 | 系统 | Artifacts 名称 | 安装方式 |
 | --- | --- | --- |
 | Windows x64 | `Baize-windows-x64` | `Baize-*-windows-x64-setup.exe` 是安装版；`*-portable.exe` 可直接运行，二选一即可 |
@@ -25,6 +27,8 @@ Linux AppImage 示例：
 chmod +x Baize-0.1.0-linux-x86_64.AppImage
 ./Baize-0.1.0-linux-x86_64.AppImage
 ```
+
+也可采用验证流程中的解包运行方式：`APPIMAGE_EXTRACT_AND_RUN=1 ./Baize-0.1.0-linux-x86_64.AppImage`。
 
 Debian / Ubuntu 可安装 DEB：
 
