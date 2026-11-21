@@ -34,6 +34,27 @@ def _load(proj, home, **env):
     return json.loads(out.stdout.strip().splitlines()[-1])
 
 
+def _app_homes(tmp_path):
+    """Keep every platform's user data paths inside the test directory."""
+    user = tmp_path / "user"
+    appdata = tmp_path / "appdata"
+    xdg = tmp_path / "xdg"
+    env = {
+        "HOME": str(user),
+        "USERPROFILE": str(user),
+        "APPDATA": str(appdata),
+        "XDG_DATA_HOME": str(xdg),
+    }
+    if os.name == "nt":
+        base, old_name, new_name = appdata, "MultiAgentsControl", "Baize"
+    elif sys.platform == "darwin":
+        base = user / "Library" / "Application Support"
+        old_name, new_name = "MultiAgentsControl", "Baize"
+    else:
+        base, old_name, new_name = xdg, "multi-agents-control", "baize"
+    return base / old_name, base / new_name, env
+
+
 def test_new_install_keeps_data_out_of_the_project(tmp_path):
     proj, home = _project(tmp_path, with_data=False), tmp_path / "home"
     got = _load(proj, home)
@@ -92,33 +113,26 @@ def test_default_location_on_each_platform(monkeypatch):
 
 def test_renamed_app_moves_old_data_home(tmp_path):
     """产品改名（MultiAgentsControl → 白泽 Baize）：旧数据目录整体搬到新名字下。"""
-    if os.name == "nt":
-        import pytest
-        pytest.skip("Windows 上这个测试会碰真实的 %APPDATA%，在 Linux/macOS 上验证")
     proj = _project(tmp_path, with_data=False)
-    xdg = tmp_path / "xdg"
-    legacy = xdg / "multi-agents-control"
+    legacy, home, env = _app_homes(tmp_path)
     (legacy / "data").mkdir(parents=True)
     (legacy / "data" / "mac.db").write_bytes(b"old-home-database")
-    got = _load(proj, None, XDG_DATA_HOME=str(xdg))
-    assert got["data"] == str(xdg / "baize" / "data")
-    assert (xdg / "baize" / "data" / "mac.db").read_bytes() == b"old-home-database"
+    got = _load(proj, None, **env)
+    assert got["data"] == str(home / "data")
+    assert (home / "data" / "mac.db").read_bytes() == b"old-home-database"
     assert not legacy.exists()
     assert any("数据目录" in m for m in got["migrated"])
 
 
 def test_renamed_home_never_overwrites_existing(tmp_path):
     """新旧两个数据目录都存在时：保留新的，旧的原样留在原地（什么都不丢）。"""
-    if os.name == "nt":
-        import pytest
-        pytest.skip("Windows 上这个测试会碰真实的 %APPDATA%，在 Linux/macOS 上验证")
     proj = _project(tmp_path, with_data=False)
-    xdg = tmp_path / "xdg"
-    (xdg / "multi-agents-control" / "data").mkdir(parents=True)
-    (xdg / "multi-agents-control" / "data" / "mac.db").write_bytes(b"old")
-    (xdg / "baize" / "data").mkdir(parents=True)
-    (xdg / "baize" / "data" / "mac.db").write_bytes(b"new")
-    got = _load(proj, None, XDG_DATA_HOME=str(xdg))
-    assert (xdg / "baize" / "data" / "mac.db").read_bytes() == b"new"
-    assert (xdg / "multi-agents-control" / "data" / "mac.db").read_bytes() == b"old"
-    assert got["data"] == str(xdg / "baize" / "data")
+    legacy, home, env = _app_homes(tmp_path)
+    (legacy / "data").mkdir(parents=True)
+    (legacy / "data" / "mac.db").write_bytes(b"old")
+    (home / "data").mkdir(parents=True)
+    (home / "data" / "mac.db").write_bytes(b"new")
+    got = _load(proj, None, **env)
+    assert (home / "data" / "mac.db").read_bytes() == b"new"
+    assert (legacy / "data" / "mac.db").read_bytes() == b"old"
+    assert got["data"] == str(home / "data")

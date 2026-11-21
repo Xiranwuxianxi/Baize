@@ -7,6 +7,13 @@ LOCAL = TestClient(main.app, client=("127.0.0.1", 50000))
 REMOTE = TestClient(main.app, client=("192.168.1.23", 50000))
 
 
+def test_lifespan_tracks_startup_and_shutdown(monkeypatch):
+    monkeypatch.setitem(main.orchestra.SHUTTING_DOWN, "now", True)
+    with TestClient(main.app):
+        assert main.orchestra.SHUTTING_DOWN["now"] is False
+    assert main.orchestra.SHUTTING_DOWN["now"] is True
+
+
 def test_lan_is_closed_by_default_but_local_works():
     assert LOCAL.get("/api/state").status_code == 200
     r = REMOTE.get("/api/state")

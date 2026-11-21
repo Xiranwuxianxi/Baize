@@ -256,10 +256,23 @@ def test_tool_schemas_follow_permissions_and_map_to_actions():
 class SlowModel(FakeModel):
     """每次回复要花一点时间，用来区分并行和依次执行。"""
 
+    def __init__(self, script):
+        super().__init__(script)
+        self.active_members = 0
+        self.peak_members = 0
+
     async def stream(self, provider, model, system, msgs, opts=None):
-        await asyncio.sleep(0.4 if "分派给你的任务" in msgs[-1]["content"] else 0)
-        async for chunk in super().stream(provider, model, system, msgs, opts):
-            yield chunk
+        member = "分派给你的任务" in msgs[-1]["content"]
+        if member:
+            self.active_members += 1
+            self.peak_members = max(self.peak_members, self.active_members)
+        try:
+            await asyncio.sleep(0.4 if member else 0)
+            async for chunk in super().stream(provider, model, system, msgs, opts):
+                yield chunk
+        finally:
+            if member:
+                self.active_members -= 1
 
 
 def _lead_team(parallel):
@@ -280,13 +293,11 @@ def test_lead_assignments_run_in_parallel_by_default(monkeypatch):
     script, conv = _lead_team(True)
     model = SlowModel(script)
     monkeypatch.setattr(providers, "stream", model.stream)
-    started = time.time()
     asyncio.run(orchestra.run_conversation(conv["id"], []))
-    took = time.time() - started
     said = _agent_msgs(conv["id"])
     members = [m for m in said if m.get("task")]
     assert sorted(m["agent_name"] for m in members) == ["产品", "测试", "设计"]
-    assert took < 1.0, took  # 三个成员各要 0.4 秒，同时开工，总共不到 1 秒（依次做要 1.2 秒以上）
+    assert model.peak_members == 3  # Check overlap directly, independent of CI speed.
     assert len({m["batch"] for m in members}) == 1 and members[0]["batch"]  # 同一批，界面并排显示
     member_calls = [c for c in model.calls if c["name"] != "领头"]
     assert all("交付了" not in m["content"] for c in member_calls for m in c["msgs"])  # 成员之间互相看不到
@@ -298,9 +309,8 @@ def test_lead_can_run_assignments_one_by_one(monkeypatch):
     script, conv = _lead_team(False)
     model = SlowModel(script)
     monkeypatch.setattr(providers, "stream", model.stream)
-    started = time.time()
     asyncio.run(orchestra.run_conversation(conv["id"], []))
-    assert time.time() - started >= 1.2
+    assert model.peak_members == 1
     members = [m for m in _agent_msgs(conv["id"]) if m.get("task")]
     assert [m["agent_name"] for m in members] == ["产品", "设计", "测试"] and not members[0]["batch"]
     later = [c for c in model.calls if c["name"] == "测试"][0]

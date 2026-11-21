@@ -6,6 +6,7 @@ import os
 import re
 import socket
 import time
+from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
 
@@ -40,8 +41,20 @@ from orchestra import approvals, run_conversation, strip_agent_tags
 HOST, PORT = config.HOST, config.PORT
 DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
 
-VERSION = open(os.path.join(config.ROOT, "VERSION"), encoding="utf-8").read().strip()  # 版本号的唯一来源：项目根目录的 VERSION 文件
-app = FastAPI(title="Multi-Agents Control", version=VERSION)
+with open(os.path.join(config.ROOT, "VERSION"), encoding="utf-8") as _version_file:
+    VERSION = _version_file.read().strip()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    orchestra.SHUTTING_DOWN["now"] = False
+    try:
+        yield
+    finally:
+        orchestra.SHUTTING_DOWN["now"] = True
+
+
+app = FastAPI(title="Multi-Agents Control", version=VERSION, lifespan=lifespan)
 # 各功能模块的接口（必须在最后挂载前端静态文件之前注册）
 for _module in (files, attachments, usage, lessons, memory, skills, external, backup):
     app.include_router(_module.router)
@@ -179,11 +192,6 @@ def sync_config() -> None:
 
 sync_config()
 orchestra.recover_interrupted()  # 上次服务停止时没跑完的会话：标记出来，界面上给「继续」
-
-
-@app.on_event("shutdown")
-async def _on_shutdown() -> None:
-    orchestra.SHUTTING_DOWN["now"] = True  # 这时被取消的会话算被打断，下次启动提示继续
 
 
 @app.post("/api/conversations/{cid}/interrupted/dismiss")

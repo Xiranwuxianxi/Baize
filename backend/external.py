@@ -60,17 +60,79 @@ def _ext_agent(token: str) -> Dict[str, Any]:
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 
 
+def _windows_descendants(pid: int) -> List[int]:
+    """Find descendants without relying on taskkill's WMI permissions."""
+    import ctypes
+    from ctypes import wintypes
+
+    class ProcessEntry(ctypes.Structure):
+        _fields_ = [
+            ("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD),
+            ("th32ProcessID", wintypes.DWORD), ("th32DefaultHeapID", ctypes.c_size_t),
+            ("th32ModuleID", wintypes.DWORD), ("cntThreads", wintypes.DWORD),
+            ("th32ParentProcessID", wintypes.DWORD), ("pcPriClassBase", wintypes.LONG),
+            ("dwFlags", wintypes.DWORD), ("szExeFile", wintypes.WCHAR * 260),
+        ]
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    for name in ("Process32FirstW", "Process32NextW"):
+        fn = getattr(kernel, name)
+        fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
+        fn.restype = wintypes.BOOL
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
+
+    snapshot = kernel.CreateToolhelp32Snapshot(0x00000002, 0)  # TH32CS_SNAPPROCESS
+    if snapshot == ctypes.c_void_p(-1).value:
+        raise ctypes.WinError(ctypes.get_last_error())
+    children: Dict[int, List[int]] = {}
+    try:
+        entry = ProcessEntry()
+        entry.dwSize = ctypes.sizeof(entry)
+        more = kernel.Process32FirstW(snapshot, ctypes.byref(entry))
+        while more:
+            children.setdefault(entry.th32ParentProcessID, []).append(entry.th32ProcessID)
+            more = kernel.Process32NextW(snapshot, ctypes.byref(entry))
+        if ctypes.get_last_error() != 18:  # ERROR_NO_MORE_FILES
+            raise ctypes.WinError(ctypes.get_last_error())
+    finally:
+        kernel.CloseHandle(snapshot)
+
+    descendants = [pid]
+    seen = {pid}
+    for parent in descendants:
+        for child in children.get(parent, []):
+            if child not in seen:
+                seen.add(child)
+                descendants.append(child)
+    return descendants[:0:-1]  # Children must stop before their parents.
+
+
 def _kill_tree(proc: "subprocess.Popen[bytes]") -> None:
     """连同它启动的子进程一起结束（只杀 shell 的话，真正干活的程序还会在后台跑）。"""
-    if proc.poll() is not None:
-        return
     try:
         if os.name == "nt":
-            subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+            try:
+                result = subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True, timeout=1)
+            except (OSError, subprocess.TimeoutExpired):
+                result = None
+            if result is None or result.returncode != 0:
+                try:
+                    for pid in _windows_descendants(proc.pid):
+                        try:
+                            os.kill(pid, signal.SIGTERM)
+                        except OSError as e:
+                            if e.winerror != 87:  # Process already exited.
+                                raise
+                finally:
+                    proc.kill()
         else:
             os.killpg(proc.pid, signal.SIGKILL)
-    except (OSError, ProcessLookupError):
+    except OSError:
         proc.kill()
+    proc.wait()
 
 
 async def run_cli_agent(cmd: str, prompt: str, cwd: str, timeout: int,
@@ -111,8 +173,9 @@ async def run_cli_agent(cmd: str, prompt: str, cwd: str, timeout: int,
     def drain_err() -> None:
         err.append(proc.stderr.read())
 
-    for fn in (feed, pump, drain_err):
-        threading.Thread(target=fn, daemon=True).start()
+    workers = [threading.Thread(target=fn, daemon=True) for fn in (feed, pump, drain_err)]
+    for worker in workers:
+        worker.start()
     decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
     out = ""
     deadline = time.time() + timeout
@@ -138,6 +201,11 @@ async def run_cli_agent(cmd: str, prompt: str, cwd: str, timeout: int,
         await asyncio.to_thread(_kill_tree, proc)
         raise
     finally:
+        # Reap the pipe readers before asyncio.run() can close their event loop.
+        for worker in workers:
+            await asyncio.to_thread(worker.join)
+        for stream in (proc.stdin, proc.stdout, proc.stderr):
+            stream.close()
         if prompt_file and os.path.exists(prompt_file):
             os.remove(prompt_file)
     if code != 0:  # 失败时有的工具把报错打在标准输出里，不能当成回复

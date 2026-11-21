@@ -1,5 +1,8 @@
 """命令行外部智能体：输出边写边看到；超时、用户停止时连同子进程一起结束。用一个 Python 小脚本假装是外部智能体。"""
 import asyncio
+import os
+import signal
+import subprocess
 import sys
 import time
 
@@ -52,6 +55,53 @@ def test_failure_reports_stderr(tmp_path):
     bad = _agent_cmd("import sys; sys.stderr.write('model not found'); sys.exit(2)")
     with pytest.raises(providers.ProviderError, match="model not found"):
         asyncio.run(external.run_cli_agent(bad, "", str(tmp_path), 10))
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows taskkill fallback")
+@pytest.mark.parametrize("failure", ["denied", "missing", "timeout"])
+def test_windows_stop_kills_descendants_when_taskkill_fails(tmp_path, monkeypatch, failure):
+    import ctypes
+    from ctypes import wintypes
+
+    def fail_taskkill(args, **kwargs):
+        assert args[0] == "taskkill"
+        if failure == "missing":
+            raise FileNotFoundError("taskkill")
+        if failure == "timeout":
+            raise subprocess.TimeoutExpired(args, kwargs["timeout"])
+        return subprocess.CompletedProcess(args, 1, b"", b"Access is denied")
+
+    monkeypatch.setattr(external.subprocess, "run", fail_taskkill)
+    script = ("import subprocess,sys,time; "
+              "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); "
+              "print(child.pid, flush=True); time.sleep(30)")
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.WaitForSingleObject.restype = wintypes.DWORD
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
+    child_pid, child_handle = None, None
+    proc = subprocess.Popen([sys.executable, "-c", script], cwd=tmp_path, stdout=subprocess.PIPE)
+    try:
+        child_pid = int(proc.stdout.readline())
+        child_handle = kernel.OpenProcess(0x00100000, False, child_pid)  # SYNCHRONIZE
+        assert child_handle, ctypes.WinError(ctypes.get_last_error())
+        external._kill_tree(proc)
+        assert proc.poll() is not None
+        assert kernel.WaitForSingleObject(child_handle, 3000) == 0
+    finally:
+        if child_pid is not None:
+            try:
+                os.kill(child_pid, signal.SIGTERM)
+            except OSError:
+                pass
+        proc.kill()
+        proc.wait()
+        proc.stdout.close()
+        if child_handle:
+            kernel.CloseHandle(child_handle)
 
 
 def test_agent_timeout_setting():
