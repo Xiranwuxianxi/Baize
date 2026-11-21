@@ -19,19 +19,32 @@ def _agent_cmd(script):
 
 
 def test_output_is_streamed_while_the_agent_is_still_working(tmp_path):
-    cmd = _agent_cmd("import sys,time; q=sys.stdin.read(); [print('第%d步' % i, flush=True) or time.sleep(0.4) for i in range(3)]; print('题目长度', len(q))")
+    # The child cannot finish until the callback acknowledges each streamed step.
+    script = tmp_path / "streaming_agent.py"
+    script.write_text(
+        "import pathlib, sys, time\n"
+        "q = sys.stdin.read()\n"
+        "for i in range(3):\n"
+        "    print('第%d步' % i, flush=True)\n"
+        "    while not pathlib.Path('ack-%d' % i).exists():\n"
+        "        time.sleep(0.01)\n"
+        "print('题目长度', len(q))\n",
+        encoding="utf-8",
+    )
+    cmd = '%s "%s"' % (PY, script)
     seen = []
 
     async def go():
         async def on_text(t):
-            seen.append((time.time(), t))
+            seen.append(t)
+            for i in range(3):
+                if "第%d步" % i in "".join(seen):
+                    (tmp_path / ("ack-%d" % i)).touch()
         return await external.run_cli_agent(cmd, "你好" * 10, str(tmp_path), 30, on_text)
 
-    started = time.time()
     out = asyncio.run(go())
     assert out.splitlines() == ["第0步", "第1步", "第2步", "题目长度 20"]
     assert len(seen) >= 3  # 分几次拿到，而不是最后一次性给
-    assert seen[0][0] - started < 0.9  # 第一段在它干完活（约 1.2 秒）之前就到了
 
 
 def test_timeout_and_stop_kill_the_agent(tmp_path):
