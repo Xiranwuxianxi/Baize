@@ -1,0 +1,11 @@
+# Direct dependencies with pinned major-version ranges, to avoid incompatible upgrades.
+# Exact versions of every package (incl. transitive deps) live in requirements.lock;
+# run.py and Docker install from it. NOTE: ASCII only - pip reads requirements files
+# with the system locale (GBK on Chinese Windows), so non-ASCII comments break installs.
+# To upgrade: adjust ranges here, pip install -r requirements.txt in a fresh env,
+# run the tests, then pip freeze to refresh requirements.lock.
+fastapi>=0.115,<0.130
+uvicorn[standard]>=0.30,<0.40
+httpx>=0.27,<0.29
+pyyaml>=6.0,<7
+pypdf>=6.0,<7

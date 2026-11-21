@@ -1,0 +1,16 @@
+.git
+.github
+.claude
+data
+workspace
+config.yaml
+.env
+.env.*
+docs
+tests
+*.md
+backend/.venv
+**/__pycache__
+frontend/node_modules
+frontend/dist
+.dev-home

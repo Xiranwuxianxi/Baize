@@ -1,0 +1,80 @@
+# 白泽 · 多智能体控制台配置文件（可选）。复制为 config.yaml 后修改，重启生效。
+# 不用这个文件也可以：访问口令、本地操作、工作区都能在界面的「设置」页里改，渠道和智能体也能在界面里建。
+# 这个文件适合想把配置纳入版本管理、或批量部署的场景。
+# 优先级：界面「设置」页里改过的项 > 环境变量（含 .env） > 本文件 > 默认值。
+# 这里声明的渠道和智能体会在每次启动时写入数据库（界面里标注「配置文件」）；
+# 在界面里对它们的修改会在下次启动时被本文件覆盖，从本文件删除的条目也会被移除。
+
+server:
+  host: 0.0.0.0        # 只想本机访问改成 127.0.0.1
+  port: 18760
+  token: ""            # 访问口令；对局域网开放时建议设置
+  # data_dir: D:/my-data   # 数据库所在目录；默认在你的数据目录下的 data（不在项目文件夹里）
+
+# 本地操作的默认值：允许智能体在这台机器上执行命令、读写文件，每一步默认先征求你的同意。
+# 这些都可以在界面的「设置」页里随时改，在那里改过的项以界面为准。
+# 没有访问口令时，只有这台电脑上的浏览器可以发消息和审批；Docker 部署则必须设置访问口令。
+# Docker 部署时，智能体只能操作容器内的环境和挂载进去的工作区，管不了宿主机。
+local_access:
+  enabled: false
+  # workspace: D:/my-workspace    # 命令的工作目录，也是读写文件的范围；默认在你的数据目录下的 workspace
+  approval: ask                   # ask = 逐条询问；auto = 不询问直接执行（风险自负）
+  allow_outside_workspace: false  # 是否允许读写工作目录之外的文件
+  timeout: 60                     # 单条命令最长执行秒数
+  max_steps: 6                    # 一次发言里最多连续操作几轮
+
+# 模型渠道。protocol 可选：openai / openai_responses / anthropic / gemini / ollama
+providers:
+  - id: ollama
+    name: 本机 Ollama
+    protocol: ollama
+    base_url: http://localhost:11434   # Docker 里访问宿主机用 http://host.docker.internal:11434
+    default_model: qwen3:8b
+    # num_ctx: 8192      # 上下文长度。Ollama 自己默认只有 4096，对话一长模型就写不出正文；内存充裕可以调大
+
+  # - id: openai
+  #   name: OpenAI
+  #   protocol: openai
+  #   base_url: https://api.openai.com/v1
+  #   api_key: env:OPENAI_API_KEY      # 推荐写成 env:变量名，密钥放在 .env 或环境变量里
+  #   default_model: gpt-4o-mini
+
+  # - id: claude
+  #   name: Anthropic Claude
+  #   protocol: anthropic
+  #   api_key: env:ANTHROPIC_API_KEY
+  #   default_model: claude-sonnet-5-5
+
+# 智能体。provider 填上面渠道的 id。
+agents:
+  - id: chief
+    name: 总管
+    chief: true          # 总智能体：每个新会话默认由它接待，它可以把下面的专业智能体拉进来
+    # no_tools: true     # 设为 true 则这个智能体永远不能提出本地操作请求
+    # auto_approve: true # 设为 true 则它的本地操作不再询问（等同于在审批卡片上点「永久允许」）
+    avatar: ph:Crown     # 留空用名字首字；ph:图标名 使用图标
+    # avatar_file: ./avatars/chief.png   # 或者用一张图片做头像
+    color: teal          # persimmon / rose / amber / olive / pine / teal / slate / plum
+    provider: ollama
+    # model: 留空使用渠道的 default_model
+    description: 接待用户、拆解任务、调度专业智能体并汇总结论
+    system_prompt: |
+      你是团队的总管，做事干练。接到需求先判断自己能否直接完成：
+      能就直接回答；需要专业能力时，把工作拆成清晰的小任务交给合适的智能体，
+      拿到结果后审阅、取舍，给用户一个明确的结论。
+
+  - id: architect
+    name: 架构师
+    avatar: ph:Code
+    color: slate
+    provider: ollama
+    description: 给出技术方案、关键取舍与示例代码
+    system_prompt: 你是一位经验丰富的软件架构师。给出可落地的技术方案，说明关键取舍、风险与替代方案。
+
+  - id: critic
+    name: 批判者
+    avatar: ph:Scales
+    color: rose
+    provider: ollama
+    description: 审视方案，指出漏洞、隐含假设和风险
+    system_prompt: 你的职责是批判性审视他人的方案，指出漏洞、隐含假设和被忽略的风险，并给出改进建议。对事不对人。

@@ -1,0 +1,2 @@
+// 智能体回复里的操作标签（显示时去掉，单独画成操作卡片）。不依赖浏览器，导出等纯函数也能用。
+export const ACTION = /<run>[\s\S]*?<\/run>|<read>[\s\S]*?<\/read>|<write\s+path=["'][^"']+["']\s*>[\s\S]*?<\/write>|<agent\s+name=["'][^"'<>]+["'][^>]*>[\s\S]*?<\/agent>|<remove\s+name=["'][^"'<>]+["']\s*\/?>|<mcp\s+server=[\s\S]*?<\/mcp>|<(fetch|skill_find|skill_remove|mcp_remove)\s[^>]*\/?>(\s*<\/\1>)?|<skill_add\s+url=[^>]*\/?>|<skill_add[\s\S]*?<\/skill_add>|<mcp_add>[\s\S]*?<\/mcp_add>|<lesson>[\s\S]*?<\/lesson>|<remember>[\s\S]*?<\/remember>|<skill_add\s+path=[^>]*\/?>/g
