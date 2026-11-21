@@ -13,15 +13,15 @@ Sign in to GitHub, open the **Desktop packages** workflow, choose a successful r
 | Windows x64 | `Baize-windows-x64` | Setup EXE and portable EXE; choose one |
 | macOS Apple Silicon | `Baize-macos-arm64` | DMG and application ZIP |
 | macOS Intel | `Baize-macos-x64` | DMG and application ZIP |
-| Linux x64 | `Baize-linux-x64` | AppImage and DEB |
+| Linux x64 | `Baize-linux-x64` | AppImage |
 
 [Verified v0.1.0 build](https://github.com/Xiranwuxianxi/Baize/actions/runs/44930292420). Artifacts are retained for **30 days**. Maintainers can regenerate them through **Run workflow**; other users can build locally or run the workflow in a fork.
 
-On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, install the DEB with your package manager, or make the AppImage executable:
+On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, make the AppImage executable:
 
 ```sh
-chmod +x Baize-0.1.0-linux-x64.AppImage
-./Baize-0.1.0-linux-x64.AppImage
+chmod +x Baize-0.1.0-linux-x86_64.AppImage
+./Baize-0.1.0-linux-x86_64.AppImage
 ```
 
 Windows release signing is not configured. macOS apps are ad-hoc signed and are not notarized. The operating system may display a source-verification prompt.
@@ -44,7 +44,7 @@ Closing the last window exits the app on Windows and Linux. On macOS, use the ap
 
 Linux follows `XDG_DATA_HOME` / `XDG_CONFIG_HOME` when configured. Set `MAC_HOME` to override the backend data location. The backend folder stores the database, private configuration and workspace; the Electron profile stores browser data and the desktop port record. Keeping these separate also preserves legacy data migration.
 
-Export a backup from the UI before updating. Quit the old app, then install the new Windows setup, replace the portable executable or macOS application, or use the updated AppImage/DEB. Replacing program files does not itself erase user data. When moving to another computer, back up the data folder rather than copying only the executable.
+Export a backup from the UI before updating. Quit the old app, then install the new Windows setup, replace the portable executable or macOS application, or use the updated AppImage. Replacing program files does not itself erase user data. When moving to another computer, back up the data folder rather than copying only the executable.
 
 Legacy `MultiAgentsControl` / `multi-agents-control` data is migrated without overwriting existing destination data.
 
@@ -53,6 +53,8 @@ Legacy `MultiAgentsControl` / `multi-agents-control` data is migrated without ov
 Use **Actions → Desktop packages → Run workflow** once to start Windows x64, Linux x64, macOS Apple Silicon and macOS Intel jobs. A `v*` tag also triggers the workflow. Each target uses a native runner because the frozen Python backend is OS-specific.
 
 Each job builds installers, launches the unpacked app for a smoke test, audits package contents and checks that generated files did not enter the Git checkout. Only final EXE, DMG, ZIP, AppImage and DEB files are uploaded as artifacts.
+
+The build configuration also defines a DEB target, but the verified Linux artifact currently contains only the AppImage. The download table reflects the actual uploaded files; DEB output is not yet verified.
 
 ## Build on the current platform
 

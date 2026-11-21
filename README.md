@@ -49,7 +49,7 @@
 | Windows x64 | `Baize-windows-x64` | `*-setup.exe` 为安装版，`*-portable.exe` 为免安装版，选择一个运行即可 |
 | macOS，Apple Silicon（M 系列） | `Baize-macos-arm64` | DMG 安装包和应用 ZIP；打开 DMG 后将 Baize 拖到 Applications |
 | macOS，Intel | `Baize-macos-x64` | DMG 安装包和应用 ZIP，使用方式同上 |
-| Linux x64 | `Baize-linux-x64` | AppImage 和 DEB；AppImage 需赋予执行权限，DEB 可交给系统包管理器安装 |
+| Linux x64 | `Baize-linux-x64` | AppImage；解压后赋予执行权限再运行 |
 
 构建产物保留 **30 天**，到期后可重新运行工作流生成。当前 Windows 包没有发行证书签名，macOS 包为临时签名、未经过 Apple 公证，系统可能提示来源未验证。完整的安装、更新、数据位置、构建与常见问题见 [桌面版指南](docs/desktop.md)。
 
