@@ -1,6 +1,7 @@
 // English translations. Keys are the original Chinese text, exactly as written in the components.
 // Anything missing here is shown in Chinese, so the interface can be translated file by file.
 const en: Record<string, string> = {
+  '关于白泽': 'About Baize',
   // navigation and page titles
   '消息': 'Chats',
   '智能体': 'Agents',

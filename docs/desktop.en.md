@@ -13,9 +13,9 @@ Sign in to GitHub, open the **Desktop packages** workflow, choose a successful r
 | Windows x64 | `Baize-windows-x64` | Setup EXE and portable EXE; choose one |
 | macOS Apple Silicon | `Baize-macos-arm64` | DMG and application ZIP |
 | macOS Intel | `Baize-macos-x64` | DMG and application ZIP |
-| Linux x64 | `Baize-linux-x64` | AppImage |
+| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
 
-[Verified v0.1.0 build](https://github.com/Xiranwuxianxi/Baize/actions/runs/44930292420). Artifacts are retained for **30 days**. Maintainers can regenerate them through **Run workflow**; other users can build locally or run the workflow in a fork.
+[Desktop builds and installation checks](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) run on native systems. Choose a run where all four jobs passed, then download its artifacts. Artifacts are retained for 30 days.
 
 On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, make the AppImage executable:
 
@@ -52,9 +52,9 @@ Legacy `MultiAgentsControl` / `multi-agents-control` data is migrated without ov
 
 Use **Actions → Desktop packages → Run workflow** once to start Windows x64, Linux x64, macOS Apple Silicon and macOS Intel jobs. A `v*` tag also triggers the workflow. Each target uses a native runner because the frozen Python backend is OS-specific.
 
-Each job builds installers, launches the unpacked app for a smoke test, audits package contents and checks that generated files did not enter the Git checkout. Only final EXE, DMG, ZIP, AppImage and DEB files are uploaded as artifacts.
+Each job builds every expected distribution format, launches the unpacked application and each final package, audits package contents and checks that generated files did not enter Git. Missing output files or failed package checks fail the build. Only final EXE, DMG, ZIP, AppImage and DEB files are uploaded.
 
-The build configuration also defines a DEB target, but the verified Linux artifact currently contains only the AppImage. The download table reflects the actual uploaded files; DEB output is not yet verified.
+Final packages are tested on their native systems: Windows setup installation/uninstallation and portable permission/concurrent-launch checks; DMG installation, ZIP extraction and signature integrity on both Mac architectures; AppImage extract-and-run and DEB installation/uninstallation on Linux. Every launch checks that the interface renders and waits for the app to exit.
 
 ## Build on the current platform
 

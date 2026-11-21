@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { motion } from 'motion/react'
-import { Avatar, Btn, Icon } from '../components/ui.jsx'
+import { Avatar, Btn, Icon, Logo } from '../components/ui.jsx'
 
 const TEAM = [
   { name: '产品经理', avatar: 'ph:Target', color: 'persimmon', note: '梳理范围', x: 16 },
@@ -65,7 +65,7 @@ export default function Welcome({ data, go, newConv }) {
     <div className="scroll flex-1 overflow-y-auto">
       <div className="mx-auto grid min-h-full max-w-[1120px] items-center gap-12 px-6 py-10 md:px-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
-          <p className="font-mono text-xs tracking-wide text-faint">MULTI-AGENT CONSOLE</p>
+          <div className="flex items-center gap-3"><Logo size={38} /><p className="text-sm font-semibold tracking-wide text-ink">白泽 Baize</p></div>
           <h1 className="mt-3 text-4xl leading-[1.1] font-semibold tracking-tighter text-ink md:text-5xl">组建你自己的<br />智能体团队</h1>
           <p className="mt-5 max-w-[44ch] text-base leading-relaxed text-muted">想建多少建多少，每个智能体可以用不同的模型。你只需要和总智能体说话，它会把合适的专业智能体拉进来一起做事。</p>
           <ol className="mt-9 max-w-[520px] divide-y divide-line border-y border-line">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { t } from '../lib/i18n'
+import brandIcon from '../assets/baize.png'
 
 // 字符串就翻译，其他（元素、数组）原样返回
 const tr = (v) => (typeof v === 'string' ? t(v) : v)
@@ -29,14 +30,7 @@ export function Icon({ name, size = 18, weight = 'regular', className = '' }) {
 
 export function Logo({ size = 30 }) {
   return (
-    <span className="inline-flex shrink-0 items-center justify-center rounded-[10px] bg-accent text-on-accent shadow-xs" style={{ width: size, height: size }}>
-      <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-        <path d="M7.4 8.6 11 15.2M16.6 8.6 13 15.2M9.2 6.5h5.6" opacity="0.7" />
-        <circle cx="6.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" />
-        <circle cx="17.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="17.5" r="2.5" fill="currentColor" stroke="none" />
-      </svg>
-    </span>
+    <img src={brandIcon} width={size} height={size} alt="白泽 Baize" draggable={false} className="inline-block shrink-0 object-contain" />
   )
 }
 

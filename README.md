@@ -1,3 +1,5 @@
+<p><img src="desktop/assets/icon.png" width="96" height="96" alt="Baize"></p>
+
 # 白泽 · 多智能体控制台（Baize）
 
 在桌面应用或浏览器里组建你自己的 AI 团队：随意创建智能体，给它们起名字、写角色设定、接上模型，让它们在同一个会话里分工协作。你可以直接和成员交流，也可以让领头人分派任务、审阅结果并汇总答复。聊天记录、配置和工作区保存在本机；使用云端模型时，模型请求仍会发给对应服务商。
@@ -18,6 +20,12 @@
 <td><img src="docs/images/mobile.png" alt="手机上的会话界面"></td>
 </tr>
 </table>
+
+## 为什么叫白泽？
+
+白泽是中国传说中的智慧瑞兽。《云笈七签·轩辕本纪》记载它“能言，达于万物之情”。项目借用这一意象：理解不同智能体的专长，连接模型与工具，让它们在人的掌控下协作。**知各有所长，协众智成事。** Baize 是“白泽”的拼音形式，作为英文产品名。
+
+新标志以白玉般的兽面、双角和紫色额纹演绎白泽，统一用于桌面应用、安装包、网页与文档。[命名出处与标志说明](docs/branding.md)。
 
 ## 和只用一个 AI 助手比，好在哪
 
@@ -49,7 +57,7 @@
 | Windows x64 | `Baize-windows-x64` | `*-setup.exe` 为安装版，`*-portable.exe` 为免安装版，选择一个运行即可 |
 | macOS，Apple Silicon（M 系列） | `Baize-macos-arm64` | DMG 安装包和应用 ZIP；打开 DMG 后将 Baize 拖到 Applications |
 | macOS，Intel | `Baize-macos-x64` | DMG 安装包和应用 ZIP，使用方式同上 |
-| Linux x64 | `Baize-linux-x64` | AppImage；解压后赋予执行权限再运行 |
+| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
 
 构建产物保留 **30 天**，到期后可重新运行工作流生成。当前 Windows 包没有发行证书签名，macOS 包为临时签名、未经过 Apple 公证，系统可能提示来源未验证。完整的安装、更新、数据位置、构建与常见问题见 [桌面版指南](docs/desktop.md)。
 

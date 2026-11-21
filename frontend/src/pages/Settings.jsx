@@ -8,8 +8,11 @@ import Lessons from '../components/Lessons.jsx'
 import Usage from '../components/Usage.jsx'
 import Blocked from '../components/Blocked.jsx'
 import Backup from '../components/Backup.jsx'
+import BrandAbout from '../components/BrandAbout.jsx'
 
 const TABS = [['usage', '用量'], ['network', '访问与网络'], ['local', '本地操作与文件'], ['team', '智能体协作'], ['lessons', '经验与记忆'], ['data', '数据与记录']]
+
+TABS.push(['about', '关于白泽'])
 
 const size = (n) => (n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB')
 const when = (ts) => {
@@ -409,6 +412,7 @@ export default function Settings({ data, reload, notify, openConv }) {
           <Btn disabled={locked || busy || (String(adv.timeout) === String(local.timeout) && String(adv.max_steps) === String(local.max_steps))} onClick={() => setLocal({ timeout: adv.timeout, max_steps: adv.max_steps }, '执行限制已保存')}>保存限制</Btn>
         </Section>
         )}
+        {tab === 'about' && <BrandAbout />}
       </Page>
     </>
   )

@@ -10,14 +10,14 @@
 2. 选择一次成功完成的运行，滚动到页面底部的 **Artifacts**。
 3. 下载符合系统和 CPU 架构的产物 ZIP，先将外层 ZIP 解压，再选择其中的安装文件。
 
-[v0.1.0 已验证的三平台构建](https://github.com/Xiranwuxianxi/Baize/actions/runs/44930292420) 已通过四个架构的启动检查和包内容审计。Artifacts 不是永久下载地址，保留期为 30 天。
+[桌面构建与安装验证](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) 在各平台原生环境运行。请选择四个任务全部成功的一次运行，再下载其 Artifacts。下载产物保留 30 天。
 
 | 系统 | Artifacts 名称 | 安装方式 |
 | --- | --- | --- |
 | Windows x64 | `Baize-windows-x64` | `Baize-*-windows-x64-setup.exe` 是安装版；`*-portable.exe` 可直接运行，二选一即可 |
 | macOS，M 系列芯片 | `Baize-macos-arm64` | 打开 DMG，将 Baize 拖到 Applications；也可解压应用 ZIP |
 | macOS，Intel 芯片 | `Baize-macos-x64` | 安装方式同上；不要和 Apple Silicon 版混用 |
-| Linux x64 | `Baize-linux-x64` | AppImage，解压并赋予执行权限后运行 |
+| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
 
 Linux AppImage 示例：
 
@@ -59,12 +59,12 @@ Linux 设置 `XDG_DATA_HOME` / `XDG_CONFIG_HOME` 时使用相应系统目录。`
 | 平台 | 架构 | 安装文件 |
 | --- | --- | --- |
 | Windows | x64 | 安装版 EXE、免安装 EXE |
-| Linux | x64 | AppImage |
+| Linux | x64 | AppImage / DEB |
 | macOS | Apple Silicon、Intel | 各自的 DMG、ZIP |
 
 推送 `v*` 标签也会触发构建。最终安装文件保存在该次运行的 Artifacts 中，保留 30 天；不会提交到 Git 源码仓库。macOS 包使用临时签名，尚未经过 Apple 公证；Windows 包尚未使用发行证书签名。
 
-打包配置中还定义了 DEB 目标，但本次已验证并上传的 Linux 产物只有 AppImage；上面的下载表按实际文件列出，不能据此认为 DEB 已完成验证。
+最终安装文件也会在对应系统上运行：Windows 检查安装、卸载、便携版权限和重复启动；两种 macOS 架构检查 DMG 安装、ZIP 解压及签名完整性；Linux 检查 AppImage 解包启动和 DEB 安装、卸载。每次启动都检查界面是否渲染并等待应用退出。
 
 ## 本机构建
 

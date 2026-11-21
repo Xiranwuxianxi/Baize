@@ -66,14 +66,15 @@ if (!app.requestSingleInstanceLock()) {
     await window.loadURL(backend.origin)
     if (smoke) {
       const rendered = await window.webContents.executeJavaScript(`new Promise(resolve => {
-        const root = document.querySelector('#root')
-        if (root?.childElementCount) return resolve(true)
-        if (!root) return resolve(false)
-        const observer = new MutationObserver(() => {
-          if (root.childElementCount) { observer.disconnect(); resolve(true) }
-        })
-        observer.observe(root, { childList: true })
-        setTimeout(() => { observer.disconnect(); resolve(false) }, 10000)
+        const deadline = Date.now() + 20000
+        const check = () => {
+          const root = document.querySelector('#root')
+          const logo = root?.querySelector('nav img')
+          if (root?.querySelector('nav') && logo?.complete && logo.naturalWidth > 0) return resolve(true)
+          if (Date.now() >= deadline) return resolve(false)
+          setTimeout(check, 100)
+        }
+        check()
       })`)
       if (!rendered) throw new Error('The desktop interface did not render')
       fs.writeFileSync(path.join(smokeHome, 'smoke-result.json'), JSON.stringify({ passed: true }))

@@ -27,7 +27,7 @@ function smoke(executable, env = {}) {
 }
 
 if (process.platform === 'win32') {
-  run('powershell.exe', ['-NoProfile', '-NonInteractive', '-File', path.join(__dirname, 'test-windows-packages.ps1')], {
+  run('pwsh.exe', ['-NoProfile', '-NonInteractive', '-File', path.join(__dirname, 'test-windows-packages.ps1')], {
     BAIZE_PACKAGE_TEST_TEMP: temporary, BAIZE_PACKAGE_OUTPUT: output,
   })
 } else if (process.platform === 'darwin') {
