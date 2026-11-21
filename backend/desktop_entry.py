@@ -33,7 +33,13 @@ def main() -> None:
 
     family = socket.AF_INET6 if ":" in config.HOST else socket.AF_INET
     with socket.socket(family, socket.SOCK_STREAM) as listener:
-        listener.bind((config.HOST, 0))
+        preferred_port = int(os.environ.get("BAIZE_DESKTOP_PORT", "0"))
+        try:
+            listener.bind((config.HOST, preferred_port))
+        except OSError:
+            if not preferred_port:
+                raise
+            listener.bind((config.HOST, 0))
         config.PORT = listener.getsockname()[1]
         web.PORT = config.PORT
         os.environ["MAC_PORT"] = str(config.PORT)

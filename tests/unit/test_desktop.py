@@ -3,12 +3,14 @@ import json
 import os
 from pathlib import Path
 import queue
+import socket
 import subprocess
 import sys
 import threading
 import time
 
 import httpx
+import pytest
 
 import config
 
@@ -23,9 +25,16 @@ def test_frozen_resources_use_the_bundle_without_changing_user_data(monkeypatch,
     assert config._default_home() == str(tmp_path / "personal")
 
 
-def test_desktop_server_chooses_a_port_and_stops_when_its_parent_closes(tmp_path):
+@pytest.mark.parametrize("reuse_port", [False, True])
+def test_desktop_server_chooses_a_port_and_stops_when_its_parent_closes(tmp_path, reuse_port):
     env = {key: value for key, value in os.environ.items() if not key.startswith("MAC_")}
     env.update(MAC_HOME=str(tmp_path / "home"), MAC_HOST="127.0.0.1", PYTHONIOENCODING="utf-8")
+    if reuse_port:
+        with socket.socket() as reservation:
+            reservation.bind(("127.0.0.1", 0))
+            env["BAIZE_DESKTOP_PORT"] = str(reservation.getsockname()[1])
+    else:
+        env["BAIZE_DESKTOP_PORT"] = "0"
     lines = queue.Queue()
     proc = subprocess.Popen(
         [sys.executable, str(ROOT / "backend" / "desktop_entry.py")], cwd=ROOT, env=env,
@@ -49,6 +58,8 @@ def test_desktop_server_chooses_a_port_and_stops_when_its_parent_closes(tmp_path
                 break
             assert time.monotonic() < deadline, "".join(captured)
         assert ready["host"] == "127.0.0.1" and 0 < ready["port"] <= 65535
+        if reuse_port:
+            assert ready["port"] == int(env["BAIZE_DESKTOP_PORT"])
         url = "http://127.0.0.1:%s/api/state" % ready["port"]
         deadline = time.monotonic() + 15
         while True:

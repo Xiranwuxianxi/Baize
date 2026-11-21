@@ -85,7 +85,10 @@ if (!app.requestSingleInstanceLock()) {
       ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : [{ label: 'File', submenu: [{ role: 'quit' }] }]),
       { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
     ]))
-    backend = await startBackend({ packaged: app.isPackaged, resourcesPath: process.resourcesPath, root, logPath: path.join(app.getPath('logs'), 'desktop-backend.log') })
+    backend = await startBackend({ packaged: app.isPackaged, resourcesPath: process.resourcesPath, root,
+      logPath: path.join(app.getPath('logs'), 'desktop-backend.log'),
+      portFile: path.join(app.getPath('userData'), 'backend-port.json'),
+    })
     backend.child.once('exit', () => {
       if (!quitting) {
         if (smoke) { console.error('Backend stopped unexpectedly'); process.exitCode = 1 }

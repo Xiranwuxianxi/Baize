@@ -4,13 +4,19 @@ const path = require('node:path')
 const readline = require('node:readline')
 const { setTimeout: delay } = require('node:timers/promises')
 
-async function startBackend({ packaged, resourcesPath, root, logPath }) {
+async function startBackend({ packaged, resourcesPath, root, logPath, portFile }) {
   const executable = process.platform === 'win32' ? 'baize-backend.exe' : 'baize-backend'
   const command = packaged
     ? path.join(resourcesPath, 'backend', executable)
     : (process.env.BAIZE_DEV_PYTHON || (process.platform === 'win32' ? 'python' : 'python3'))
   const args = packaged ? [] : [path.join(root, 'backend/desktop_entry.py')]
   const env = { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' }
+  let preferredPort = 0
+  try {
+    const saved = JSON.parse(fs.readFileSync(portFile, 'utf8')).port
+    if (Number.isInteger(saved) && saved > 1024 && saved <= 65535) preferredPort = saved
+  } catch { /* First launch or an invalid preference starts with an allocated port. */ }
+  env.BAIZE_DESKTOP_PORT = String(preferredPort)
   delete env.ELECTRON_RUN_AS_NODE
   delete env.PYTHONHOME
   delete env.PYTHONPATH
@@ -61,6 +67,7 @@ async function startBackend({ packaged, resourcesPath, root, logPath }) {
       if (Date.now() > deadline) throw new Error('The packaged web interface is not available')
       await delay(150)
     }
+    fs.writeFileSync(portFile, JSON.stringify({ port: ready.port }), { mode: 0o600 })
     return { child, origin, stop }
   } catch (error) {
     await stop()
