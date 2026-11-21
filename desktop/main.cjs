@@ -93,11 +93,9 @@ if (!app.requestSingleInstanceLock()) {
       ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : [{ label: 'File', submenu: [{ role: 'quit' }] }]),
       { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
     ]))
-    if (!smoke) {
-      startupWindow = newWindow()
-      await startupWindow.loadFile(path.join(__dirname, 'loading.html'))
-      startupWindow.show()
-    }
+    startupWindow = newWindow()
+    await startupWindow.loadFile(path.join(__dirname, 'loading.html'))
+    if (!smoke) startupWindow.show()
     backend = await startBackend({ packaged: app.isPackaged, resourcesPath: process.resourcesPath, root,
       logPath: path.join(app.getPath('logs'), 'desktop-backend.log'),
       portFile: path.join(app.getPath('userData'), 'backend-port.json'),
