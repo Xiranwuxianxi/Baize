@@ -30,7 +30,7 @@ KEY_PATTERNS = [
     re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}"),             # GitHub
     re.compile(r"hf_[A-Za-z0-9]{30,}"),                    # Hugging Face
 ]
-TEXT_EXT = (".py", ".js", ".cjs", ".spec", ".jsx", ".ts", ".tsx", ".json", ".md", ".yml", ".yaml", ".toml", ".txt", ".html", ".css",
+TEXT_EXT = (".py", ".js", ".cjs", ".nsh", ".spec", ".jsx", ".ts", ".tsx", ".json", ".md", ".yml", ".yaml", ".toml", ".txt", ".html", ".css",
             ".sh", ".bat", ".cfg", ".ini", ".env", ".example", "Dockerfile", ".lock")
 
 

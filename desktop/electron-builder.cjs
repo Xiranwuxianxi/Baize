@@ -20,6 +20,7 @@ module.exports = {
     perMachine: false,
     allowToChangeInstallationDirectory: true,
     deleteAppDataOnUninstall: false,
+    preCompressedFileExtensions: [],
   },
   portable: { artifactName: 'Baize-${version}-windows-${arch}-portable.${ext}' },
   mac: {

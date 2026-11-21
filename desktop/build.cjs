@@ -26,7 +26,9 @@ async function main() {
     '--workpath', path.join(root, '.desktop-build/pyinstaller'),
     path.join(__dirname, 'backend.spec')])
   const targets = process.argv.includes('--dir') ? Platform.current().createTarget('dir') : undefined
-  await build({ projectDir: __dirname, config: require('./electron-builder.cjs'), targets })
+  await build({ projectDir: __dirname, config: require('./electron-builder.cjs'), targets,
+    effectiveOptionComputed: require('./nsis-options.cjs'),
+  })
 }
 
 main().catch(error => { console.error(error); process.exitCode = 1 })

@@ -69,6 +69,7 @@ if (!app.requestSingleInstanceLock()) {
         setTimeout(() => { observer.disconnect(); resolve(false) }, 10000)
       })`)
       if (!rendered) throw new Error('The desktop interface did not render')
+      fs.writeFileSync(path.join(smokeHome, 'smoke-result.json'), JSON.stringify({ passed: true }))
       console.log('BAIZE_DESKTOP_SMOKE_OK')
       app.quit()
     } else window.show()
