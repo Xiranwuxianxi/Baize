@@ -15,7 +15,7 @@ Sign in to GitHub, open the **Desktop packages** workflow, choose a successful r
 | macOS Intel | `Baize-macos-x64` | DMG and application ZIP |
 | Linux x64 | `Baize-linux-x64` | AppImage / DEB |
 
-[Desktop builds and installation checks](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) run on native systems. Choose a run where all four jobs passed, then download its artifacts. Artifacts are retained for 30 days.
+[Verified build with the new logo and naming story](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838): all four native jobs passed, producing eight final distribution files. Download its artifacts within 30 days. For later builds, select a run where all four jobs passed.
 
 On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, make the AppImage executable:
 

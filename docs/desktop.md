@@ -10,7 +10,7 @@
 2. 选择一次成功完成的运行，滚动到页面底部的 **Artifacts**。
 3. 下载符合系统和 CPU 架构的产物 ZIP，先将外层 ZIP 解压，再选择其中的安装文件。
 
-[桌面构建与安装验证](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) 在各平台原生环境运行。请选择四个任务全部成功的一次运行，再下载其 Artifacts。下载产物保留 30 天。
+[新图标与命名说明已验证构建](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838)：Windows、两种 Mac 架构及 Linux 四个任务全部通过，提供 8 个最终安装文件。下载其中的 Artifacts，产物保留 30 天。后续版本仍可从上方构建页面选择四项均成功的运行。
 
 | 系统 | Artifacts 名称 | 安装方式 |
 | --- | --- | --- |
