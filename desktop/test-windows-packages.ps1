@@ -27,6 +27,14 @@ try {
   $env:BAIZE_SMOKE_EXECUTABLE = $portable[0].FullName
   node (Join-Path $PSScriptRoot 'smoke.cjs')
   if ($LASTEXITCODE -ne 0) { throw 'Final portable EXE did not render its interface' }
+  $nodeExe = (Get-Command node).Source
+  $smokeScript = '"' + (Join-Path $PSScriptRoot 'smoke.cjs') + '"'
+  $first = Start-Process -FilePath $nodeExe -ArgumentList $smokeScript -WindowStyle Hidden -PassThru
+  $second = Start-Process -FilePath $nodeExe -ArgumentList $smokeScript -WindowStyle Hidden -PassThru
+  foreach ($launch in @($first, $second)) {
+    if (-not $launch.WaitForExit(180000)) { $launch.Kill(); throw 'Concurrent portable launch timed out' }
+    if ($launch.ExitCode -ne 0) { throw 'Portable launches interfered with each other' }
+  }
 } finally {
   $env:TEMP = $previousTemp
   $env:TMP = $previousTmp

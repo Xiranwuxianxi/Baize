@@ -24,7 +24,12 @@ module.exports = {
     installerIcon: 'assets/icon.ico',
     uninstallerIcon: 'assets/icon.ico',
   },
-  portable: { artifactName: 'Baize-${version}-windows-${arch}-portable.${ext}' },
+  portable: {
+    artifactName: 'Baize-${version}-windows-${arch}-portable.${ext}',
+    // In electron-builder 26, true uses each launcher's unique $PLUGINSDIR.
+    // A second click must not delete the first instance's program directory.
+    unpackDirName: true,
+  },
   mac: {
     target: ['dmg', 'zip'], category: 'public.app-category.developer-tools',
     icon: 'assets/icon.icns',
