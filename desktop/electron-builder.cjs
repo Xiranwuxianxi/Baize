@@ -1,12 +1,13 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const { outputDirectory } = require('./release.cjs')
 
 module.exports = {
   appId: 'com.xiranwuxianxi.baize',
   productName: 'Baize',
   executableName: 'Baize',
-  extraMetadata: { version: fs.readFileSync(path.join(__dirname, '../VERSION'), 'utf8').trim() },
-  directories: { output: process.env.BAIZE_DESKTOP_OUTPUT || '../release' },
+  extraMetadata: { version: process.env.BAIZE_BUILD_VERSION || fs.readFileSync(path.join(__dirname, '../VERSION'), 'utf8').trim() },
+  directories: { output: outputDirectory(path.resolve(__dirname, '..')) },
   files: ['main.cjs', 'lib/**/*.cjs', 'assets/icon.png', 'loading.html', 'loading.css', 'package.json'],
   asar: true,
   extraResources: [{ from: '../.desktop-build/backend/baize-backend', to: 'backend', filter: ['**/*'] }],
