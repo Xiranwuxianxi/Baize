@@ -98,6 +98,17 @@ function recordSuccessfulBuild(root, plan, output, updateSourceVersion = true) {
       if (document.packages?.['']) document.packages[''].version = plan.version
       fs.writeFileSync(filename, `${JSON.stringify(document, null, 2)}\n`)
     }
+    const changelogFile = path.join(root, 'CHANGELOG.md')
+    if (fs.existsSync(changelogFile)) {
+      const changelog = fs.readFileSync(changelogFile, 'utf8')
+      if (!changelog.includes(`## [${plan.version}]`)) {
+        const entry = `## [${plan.version}] - ${plan.timestamp.slice(0, 10)}\n\n桌面打包：${plan.updateType === 'big' ? '大更新' : '小更新'}。安装文件由用户手动发布。\n\n`
+        const firstRelease = changelog.search(/^## \[\d+\.\d+\.\d+\]/m)
+        const updated = firstRelease === -1 ? `${changelog.trimEnd()}\n\n${entry}`
+          : `${changelog.slice(0, firstRelease)}${entry}${changelog.slice(firstRelease)}`
+        fs.writeFileSync(changelogFile, updated)
+      }
+    }
   }
   return receipt
 }
