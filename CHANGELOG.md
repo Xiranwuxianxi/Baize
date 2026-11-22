@@ -1,10 +1,12 @@
 # 更新日志
 
-格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
+格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。版本号使用三段数字：小更新增加末位，9 后向中间位进位；大更新增加首位并将其余两位归零。
 
 ## [未发布]
 
 ### 新增
+
+- 桌面打包前询问小更新 / 大更新；以 `1.0.1` 为版本起点，按约定进位并统一安装包内外的版本号。每批安装包保存到包含版本和北京时间的独立目录，保留旧包。GitHub 构建改为手动选择更新类型，安装文件由用户手动上传 Releases。
 
 - 产品定名「白泽」（Baize）：通晓万物的神兽，认识团队里的每个智能体。数据目录随之改为 `Baize` / `baize`，改名前的旧目录（`MultiAgentsControl` / `multi-agents-control`）启动时自动整体搬过来，新旧同时存在时保留新的、不动旧的。界面、文档、Docker 镜像、备份文件名的标识同步更新；环境变量前缀沿用 `MAC_` 不变。
 
