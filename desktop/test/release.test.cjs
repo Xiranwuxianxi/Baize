@@ -78,6 +78,7 @@ test('completed builds synchronize application versions and keep subsequent chec
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'baize-release-test-'))
   t.after(() => fs.rmSync(root, { recursive: true, force: true }))
   fs.writeFileSync(path.join(root, 'VERSION'), '1.0.1\n')
+  fs.writeFileSync(path.join(root, 'CHANGELOG.md'), '# 更新日志\n\n## [未发布]\n\n## [1.0.1] - 2026-11-22\n')
   for (const folder of ['desktop', 'frontend']) {
     fs.mkdirSync(path.join(root, folder))
     fs.writeFileSync(path.join(root, folder, 'package.json'), JSON.stringify({ version: '1.0.1', scripts: { check: 'unchanged' } }))
@@ -90,6 +91,9 @@ test('completed builds synchronize application versions and keep subsequent chec
   assert.equal(outputDirectory(root, {}), output)
   assert.equal(outputDirectory(root, { BAIZE_DESKTOP_OUTPUT: '../custom-output' }), path.join(root, 'custom-output'))
   assert.equal(fs.readFileSync(path.join(root, 'VERSION'), 'utf8').trim(), '1.0.2')
+  const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8')
+  assert.equal(changelog.match(/^## \[(\d+\.\d+\.\d+)\]/m)[1], '1.0.2')
+  assert.match(changelog, /## \[1\.0\.2\] - 2026-11-22/)
   for (const folder of ['desktop', 'frontend']) {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, folder, 'package.json')))
     const lock = JSON.parse(fs.readFileSync(path.join(root, folder, 'package-lock.json')))
@@ -104,5 +108,6 @@ test('completed builds synchronize application versions and keep subsequent chec
   recordSuccessfulBuild(root, next, nextOutput, false)
   assert.equal(fs.readFileSync(path.join(root, 'VERSION'), 'utf8').trim(), '1.0.2', 'CI must leave tracked version files untouched')
   assert.equal(outputDirectory(root, {}), nextOutput)
+  assert.equal(fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8'), changelog, 'CI must preserve the source changelog')
   assert.equal(JSON.parse(fs.readFileSync(path.join(nextOutput, 'BUILD.json'))).version, '1.0.3')
 })
