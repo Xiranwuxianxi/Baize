@@ -1,6 +1,6 @@
 {
   "name": "baize-desktop",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Baize desktop console with its own Python backend",
   "homepage": "https://github.com/Xiranwuxianxi/Baize",
@@ -13,7 +13,7 @@
     "build": "node build.cjs",
     "pack": "node build.cjs --dir",
     "smoke": "node smoke.cjs",
-    "check": "node --check main.cjs && node --check lib/backend.cjs && node --test test/*.test.cjs"
+    "check": "node --check main.cjs && node --check lib/backend.cjs && node --check build.cjs && node --check prepare-release.cjs && node --test test/*.test.cjs"
   },
   "devDependencies": {
     "electron": "45.4.1",
