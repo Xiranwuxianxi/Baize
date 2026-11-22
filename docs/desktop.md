@@ -2,24 +2,22 @@
 
 桌面版将 Electron 窗口、前端和 Python 后端一起打包。使用者无需另外安装 Node.js 或 Python；模型服务和外部 CLI 仍按各自的使用方式配置。
 
-[返回项目首页](../README.md) · [English](desktop.en.md) · [下载与构建页面](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml)
+[返回项目首页](../README.md) · [English](desktop.en.md) · [下载安装包](https://github.com/Xiranwuxianxi/Baize/releases)
 
 ## 下载与安装
 
-1. 登录 GitHub，打开上方构建页面。
-2. 选择一次成功完成的运行，滚动到页面底部的 **Artifacts**。
-3. 下载符合系统和 CPU 架构的产物 ZIP，先将外层 ZIP 解压，再选择其中的安装文件。
+1. 打开 **[Releases 下载页面](https://github.com/Xiranwuxianxi/Baize/releases)**。
+2. 找到最新发布版本，展开 **Assets** 文件列表。
+3. 根据下表下载符合系统和 CPU 架构的安装文件。
 
-[新图标与命名说明已验证构建](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838)：Windows、两种 Mac 架构及 Linux 四个任务全部通过，提供 8 个最终安装文件。下载其中的 Artifacts，产物保留 30 天。后续版本仍可从上方构建页面选择四项均成功的运行。
+文件名中的 `*` 表示产品名和版本号。**不要选择 `Source code (zip)` / `Source code (tar.gz)`，它们是源码，不是安装包。**
 
-[Linux 沙箱启动复核](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) 另外确认了这批 AppImage 和 DEB 在不传入 `--no-sandbox` 时可以加载界面并正常退出。
-
-| 系统 | Artifacts 名称 | 安装方式 |
+| 系统 | 安装文件 | 安装方式 |
 | --- | --- | --- |
-| Windows x64 | `Baize-windows-x64` | `Baize-*-windows-x64-setup.exe` 是安装版；`*-portable.exe` 可直接运行，二选一即可 |
-| macOS，M 系列芯片 | `Baize-macos-arm64` | 打开 DMG，将 Baize 拖到 Applications；也可解压应用 ZIP |
-| macOS，Intel 芯片 | `Baize-macos-x64` | 安装方式同上；不要和 Apple Silicon 版混用 |
-| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
+| Windows x64 | `*-windows-x64-setup.exe` / `*-windows-x64-portable.exe` | 前者是安装版，后者可直接运行，二选一即可 |
+| macOS，M 系列芯片 | `*-macos-arm64.dmg` / `*-macos-arm64.zip` | 打开 DMG，将 Baize 拖到 Applications；也可解压应用 ZIP |
+| macOS，Intel 芯片 | `*-macos-x64.dmg` / `*-macos-x64.zip` | 安装方式同上；不要和 Apple Silicon 版混用 |
+| Linux x64 | `*-linux-x86_64.AppImage` / `*-linux-amd64.deb` | AppImage / Debian、Ubuntu 安装包 |
 
 Linux AppImage 示例：
 
@@ -64,7 +62,7 @@ Linux 设置 `XDG_DATA_HOME` / `XDG_CONFIG_HOME` 时使用相应系统目录。`
 
 ## 一次构建全部桌面平台
 
-在 GitHub 的 **Actions → Desktop packages → Run workflow** 触发一次，即可同时生成：
+维护者可在 GitHub 的 **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow** 触发一次，即可同时生成：
 
 | 平台 | 架构 | 安装文件 |
 | --- | --- | --- |
@@ -72,9 +70,11 @@ Linux 设置 `XDG_DATA_HOME` / `XDG_CONFIG_HOME` 时使用相应系统目录。`
 | Linux | x64 | AppImage / DEB |
 | macOS | Apple Silicon、Intel | 各自的 DMG、ZIP |
 
-推送 `v*` 标签也会触发构建。最终安装文件保存在该次运行的 Artifacts 中，保留 30 天；不会提交到 Git 源码仓库。macOS 包使用临时签名，尚未经过 Apple 公证；Windows 包尚未使用发行证书签名。
+推送 `v*` 标签也会触发构建。构建产物保存在该次运行的 Artifacts 中，保留 30 天；维护者将验证后的最终安装文件上传到 [Releases](https://github.com/Xiranwuxianxi/Baize/releases)，供用户按平台下载。安装文件不会提交到 Git 源码仓库。macOS 包使用临时签名，尚未经过 Apple 公证；Windows 包尚未使用发行证书签名。
 
 最终安装文件也会在对应系统上运行：Windows 检查安装、卸载、便携版权限和重复启动；两种 macOS 架构检查 DMG 安装、ZIP 解压及签名完整性；Linux 检查 AppImage 解包启动和 DEB 安装、卸载。每次启动都检查界面是否渲染并等待应用退出。
+
+[新图标与命名说明已验证构建](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838) 的四个原生平台任务全部通过，提供 8 个最终安装文件。[Linux 沙箱启动复核](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) 另外确认了这批 AppImage 和 DEB 在不传入 `--no-sandbox` 时可以加载界面并正常退出。
 
 ## 本机构建
 
@@ -112,7 +112,7 @@ Electron 的应用文件使用明确的包含名单；GitHub 上传步骤也只�
 
 - **Windows 便携版双击后退出**：部分 Windows 临时目录的权限会让 Electron 沙箱无法读取解压后的程序。新版启动器会在运行前为程序目录补充应用包的读取和执行权限；不修改用户数据目录，不需要关闭沙箱或安全软件。请重新下载最新构建，不要继续使用旧便携包。构建流程会在带有这类继承权限的临时目录中实际启动最终便携 EXE，检查界面是否渲染。
 
-- **找不到下载按钮或产物过期**：确认已登录 GitHub，并打开成功运行详情页的 Artifacts。仓库维护者可以重新运行工作流；其他用户可从源码构建，或 Fork 后运行自己的工作流。
+- **找不到安装包**：打开 [Releases](https://github.com/Xiranwuxianxi/Baize/releases)，展开最新发布版本的 **Assets**，根据系统和 CPU 架构选择上表中的安装文件。`Source code` 是源码；如果没有对应平台的安装包，可从源码构建。
 - **窗口提示启动失败**：检查是否选对架构、应用是否完整解压，确认没有只复制解包目录里的一个 EXE。后端日志文件名是 `desktop-backend.log`；macOS 位于 `~/Library/Logs/Baize/`，Windows / Linux 位于 Electron 浏览器资料目录内的日志目录。
 - **启动后没有模型可选**：桌面包不会自带模型。先配置渠道，并检查服务地址、密钥、模型名称和本地服务是否已运行。
 - **Docker 和桌面版有什么区别**：桌面版的后端运行在本机；Docker 中的本地操作只作用于容器和挂载目录。需要操作本机文件时，先阅读 [本地操作说明](local-access.md)。
