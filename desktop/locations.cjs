@@ -1,7 +1,8 @@
 const path = require('node:path')
+const { outputDirectory } = require('./release.cjs')
 
 function applicationPaths() {
-  const output = process.env.BAIZE_DESKTOP_OUTPUT || path.resolve(__dirname, '../release')
+  const output = outputDirectory(path.resolve(__dirname, '..'))
   if (process.platform === 'darwin') {
     const app = path.join(output, process.arch === 'arm64' ? 'mac-arm64' : 'mac', 'Baize.app/Contents')
     return { executable: path.join(app, 'MacOS/Baize'), resources: path.join(app, 'Resources') }
