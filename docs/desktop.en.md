@@ -1,23 +1,21 @@
 # Baize desktop app
 
-[Project home](../README.en.md) · [中文](desktop.md) · [Downloads and builds](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml)
+[Project home](../README.en.md) · [中文](desktop.md) · [Download installers](https://github.com/Xiranwuxianxi/Baize/releases)
 
 The desktop packages include Electron, the built frontend, the Python backend and its runtime. End users do not need Node.js or Python to launch Baize. Model weights, API credits, external CLI agents and MCP servers are not included.
 
 ## Download and install
 
-Sign in to GitHub, open the **Desktop packages** workflow, choose a successful run and find **Artifacts** at the bottom. Download and extract the outer artifact ZIP, then use the installer inside.
+Open the **[Releases download page](https://github.com/Xiranwuxianxi/Baize/releases)**, expand **Assets** under the latest release and download a package for your operating system and CPU architecture.
 
-| Platform | Artifact | Contents |
+The `*` in the filenames below stands for the product name and version. **`Source code (zip)` / `Source code (tar.gz)` are source archives, not installers.**
+
+| Platform | Package filename | Installation |
 | --- | --- | --- |
-| Windows x64 | `Baize-windows-x64` | Setup EXE and portable EXE; choose one |
-| macOS Apple Silicon | `Baize-macos-arm64` | DMG and application ZIP |
-| macOS Intel | `Baize-macos-x64` | DMG and application ZIP |
-| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
-
-[Verified build with the new logo and naming story](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838): all four native jobs passed, producing eight final distribution files. Download its artifacts within 30 days. For later builds, select a run where all four jobs passed.
-
-An additional [Linux sandbox check](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) confirmed that both packages render and exit without `--no-sandbox`.
+| Windows x64 | `*-windows-x64-setup.exe` / `*-windows-x64-portable.exe` | Setup installer or portable executable; choose one |
+| macOS Apple Silicon (M series) | `*-macos-arm64.dmg` / `*-macos-arm64.zip` | Open the DMG and drag Baize into Applications, or extract the application ZIP |
+| macOS Intel | `*-macos-x64.dmg` / `*-macos-x64.zip` | Install as above; choose the Intel version |
+| Linux x64 | `*-linux-x86_64.AppImage` / `*-linux-amd64.deb` | AppImage or Debian/Ubuntu package |
 
 On Windows, run the setup installer or the portable executable. On macOS, open the DMG and drag Baize into Applications, or extract the application ZIP. On Linux, make the AppImage executable:
 
@@ -60,11 +58,15 @@ Legacy `MultiAgentsControl` / `multi-agents-control` data is migrated without ov
 
 ## Build all desktop platforms
 
-Use **Actions → Desktop packages → Run workflow** once to start Windows x64, Linux x64, macOS Apple Silicon and macOS Intel jobs. A `v*` tag also triggers the workflow. Each target uses a native runner because the frozen Python backend is OS-specific.
+Maintainers can use **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow** once to start Windows x64, Linux x64, macOS Apple Silicon and macOS Intel jobs. A `v*` tag also triggers the workflow. Each target uses a native runner because the frozen Python backend is OS-specific.
 
 Each job builds every expected distribution format, launches the unpacked application and each final package, audits package contents and checks that generated files did not enter Git. Missing output files or failed package checks fail the build. Only final EXE, DMG, ZIP, AppImage and DEB files are uploaded.
 
+Build artifacts are retained for 30 days. Maintainers upload the verified final packages to [Releases](https://github.com/Xiranwuxianxi/Baize/releases) for users to download by platform.
+
 Final packages are tested on their native systems: Windows setup installation/uninstallation and portable permission/concurrent-launch checks; DMG installation, ZIP extraction and signature integrity on both Mac architectures; AppImage extract-and-run and DEB installation/uninstallation on Linux. Every launch checks that the interface renders and waits for the app to exit.
+
+[Verified build with the new logo and naming story](https://github.com/Xiranwuxianxi/Baize/actions/runs/44944848838): all four native jobs passed, producing eight final distribution files. An additional [Linux sandbox check](https://github.com/Xiranwuxianxi/Baize/actions/runs/44946217621) confirmed that both Linux packages render and exit without `--no-sandbox`.
 
 ## Build on the current platform
 
@@ -95,7 +97,7 @@ The runtime uses an explicit file inclusion list. Private databases, `.env`, `co
 
 - **Windows portable exits immediately:** inherited permissions on some Windows temporary folders can prevent Electron's sandbox from reading the extracted application. The launcher grants application packages read/execute access to the program directory before launch. It leaves user data permissions unchanged and keeps the sandbox enabled. Download a new build instead of reusing the old portable executable. CI launches the final portable EXE under a temporary directory with inherited package permissions and checks that the interface renders.
 
-- **No artifacts or expired download:** sign in to GitHub and open a successful run. Regenerate the packages as a maintainer, build locally, or build in a fork.
+- **Cannot find an installer:** open [Releases](https://github.com/Xiranwuxianxi/Baize/releases), expand **Assets** under the latest release and choose a package from the table above. `Source code` downloads are source archives. If your platform has no package, build from source.
 - **Startup error:** check the CPU architecture and fully extract the package. Do not copy only one executable out of an unpacked application directory. The backend log is `desktop-backend.log`; on macOS it is under `~/Library/Logs/Baize/`, and on Windows/Linux it is inside the Electron profile's log directory.
 - **No models:** configure a provider and check its endpoint, key and model name, or start the local model server.
 - **Desktop versus Docker:** desktop tools run on the host; Docker tools act on the container and mounted folders. Read [local operations](local-access.md) before enabling commands or file access.
