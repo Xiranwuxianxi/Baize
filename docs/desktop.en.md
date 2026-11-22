@@ -58,11 +58,11 @@ Legacy `MultiAgentsControl` / `multi-agents-control` data is migrated without ov
 
 ## Build all desktop platforms
 
-Maintainers can use **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow** once to start Windows x64, Linux x64, macOS Apple Silicon and macOS Intel jobs. A `v*` tag also triggers the workflow. Each target uses a native runner because the frozen Python backend is OS-specific.
+In **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow**, enter the previous packaging version and choose `small` or `big`. That choice starts one batch across Windows x64, Linux x64, macOS Apple Silicon and macOS Intel. Each target uses a native runner because the frozen Python backend is OS-specific. Tag pushes do not trigger builds automatically.
 
 Each job builds every expected distribution format, launches the unpacked application and each final package, audits package contents and checks that generated files did not enter Git. Missing output files or failed package checks fail the build. Only final EXE, DMG, ZIP, AppImage and DEB files are uploaded.
 
-Build artifacts are retained for 30 days. Maintainers upload the verified final packages to [Releases](https://github.com/Xiranwuxianxi/Baize/releases) for users to download by platform.
+Build artifact names include the selected version and build time in Beijing time (UTC+8). Artifacts are retained for 30 days. **The user uploads the final installers to [Releases](https://github.com/Xiranwuxianxi/Baize/releases) manually; the workflow does not publish a release.** For a retry, reuse that batch's previous version; for a new batch, enter the version produced by the preceding batch.
 
 Final packages are tested on their native systems: Windows setup installation/uninstallation and portable permission/concurrent-launch checks; DMG installation, ZIP extraction and signature integrity on both Mac architectures; AppImage extract-and-run and DEB installation/uninstallation on Linux. Every launch checks that the interface renders and waits for the app to exit.
 
@@ -81,7 +81,20 @@ npm run smoke --prefix desktop
 node desktop/audit.cjs
 ```
 
-`build` installs frontend dependencies, builds the frontend, freezes the backend and packages the current platform. `npm run pack --prefix desktop` builds only the runnable application directory. Set `BAIZE_BUILD_PYTHON` to choose the build interpreter, or `BAIZE_DESKTOP_OUTPUT` to override the default `release/` output directory.
+`build` installs frontend dependencies, builds the frontend, freezes the backend and packages the current platform. `npm run pack --prefix desktop` builds only the runnable application directory. Set `BAIZE_BUILD_PYTHON` to choose the build interpreter.
+
+Both commands first ask whether this is a small or big update, showing the current and proposed version. Enter `q` to cancel. The baseline is aligned with the published version, `1.0.1`.
+
+| Choice | Rule | Example |
+| --- | --- | --- |
+| `small` | Increment the last number; after 9 reset it to 0 and increment the middle number | `1.2.8 → 1.2.9 → 1.3.0` |
+| `big` | Increment the first number and reset both other numbers | `1.3.4 → 2.0.0` |
+
+The middle number has no single-digit limit: `1.9.9 → 1.10.0`. A successful local build updates `VERSION`, both package manifests and their lockfiles. Installer filenames and bundled application versions use the same selected version.
+
+An assistant must ask the user first, then pass the confirmed choice, for example `npm run build --prefix desktop -- --update small`. Non-interactive builds without a choice stop instead of assuming an update type.
+
+Each batch uses a new directory such as `release/Baize-1.0.2_2026-11-22_17-35-40/`. Times use Beijing time (`Asia/Shanghai`, UTC+8) down to seconds. Older batches are preserved; a numeric suffix avoids collisions within the same second. `BAIZE_DESKTOP_OUTPUT` overrides the parent directory while retaining the timestamped subdirectory. `BUILD.json` records the batch version and time. Subsequent smoke tests, package installation checks and audits resolve the most recent successful batch automatically.
 
 | Path | Purpose | Tracked by Git |
 | --- | --- | --- |

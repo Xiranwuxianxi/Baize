@@ -25,7 +25,8 @@ jobs:
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.run_id }}
-          name: Baize-linux-x64
+          pattern: Baize-linux-x64*
+          merge-multiple: true
           path: release
       - name: Launch AppImage with the production sandbox enabled
         run: |
