@@ -2,15 +2,49 @@ name: Desktop packages
 
 on:
   workflow_dispatch:
-  push:
-    tags: ['v*']
+    inputs:
+      update_type:
+        description: '更新类型：small 小更新（末位 +1，9 后进位）；big 大更新（首位 +1，其余归零）'
+        type: choice
+        options: [small, big]
+        required: true
+      base_version:
+        description: '上一批打包版本号，例如 1.0.1；重试同一批次时保持原值'
+        type: string
+        required: true
 
 permissions:
   contents: read
 
 jobs:
+  prepare:
+    name: Select version and build time
+    runs-on: ubuntu-latest
+    outputs:
+      base_version: ${{ steps.release.outputs.base_version }}
+      version: ${{ steps.release.outputs.version }}
+      timestamp: ${{ steps.release.outputs.timestamp }}
+      folder: ${{ steps.release.outputs.folder }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Calculate the selected update
+        id: release
+        run: node desktop/prepare-release.cjs
+        env:
+          BAIZE_UPDATE_TYPE: ${{ inputs.update_type }}
+          BAIZE_BASE_VERSION: ${{ inputs.base_version }}
+
   package:
     name: ${{ matrix.name }}
+    needs: prepare
+    env:
+      BAIZE_UPDATE_TYPE: ${{ inputs.update_type }}
+      BAIZE_BASE_VERSION: ${{ needs.prepare.outputs.base_version }}
+      BAIZE_BUILD_VERSION: ${{ needs.prepare.outputs.version }}
+      BAIZE_BUILD_TIMESTAMP: ${{ needs.prepare.outputs.timestamp }}
     strategy:
       fail-fast: false
       matrix:
@@ -59,12 +93,13 @@ jobs:
       - name: Upload installers only
         uses: actions/upload-artifact@v4
         with:
-          name: Baize-${{ matrix.name }}
+          name: Baize-${{ matrix.name }}-${{ needs.prepare.outputs.version }}_${{ needs.prepare.outputs.timestamp }}
           if-no-files-found: error
           retention-days: 30
           path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
-            release/*.AppImage
-            release/*.deb
+            release/${{ needs.prepare.outputs.folder }}/*.exe
+            release/${{ needs.prepare.outputs.folder }}/*.dmg
+            release/${{ needs.prepare.outputs.folder }}/*.zip
+            release/${{ needs.prepare.outputs.folder }}/*.AppImage
+            release/${{ needs.prepare.outputs.folder }}/*.deb
+            release/${{ needs.prepare.outputs.folder }}/BUILD.json
