@@ -2,11 +2,12 @@ const { spawnSync } = require('node:child_process')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const { outputDirectory } = require('./release.cjs')
 
 // Install/uninstall tests belong on disposable native CI runners.
 if (!process.env.CI) throw new Error('Run package installation checks on a disposable CI runner')
 const root = path.resolve(__dirname, '..')
-const output = path.resolve(__dirname, process.env.BAIZE_DESKTOP_OUTPUT || '../release')
+const output = outputDirectory(root)
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'baize-package-test-'))
 function run(command, args, env = {}) {
   console.log(`Package check: ${path.basename(command)} ${args.join(' ')}`)
