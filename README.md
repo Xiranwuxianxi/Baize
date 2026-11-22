@@ -8,7 +8,7 @@
 [![Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml/badge.svg)](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml)
 [MIT 开源许可证](LICENSE)
 
-**Windows / macOS / Linux 桌面版已提供。** 桌面安装包内含前端、Python 后端和运行环境，使用者无需另外安装 Node.js 或 Python。也可以从源码运行 Web 版，或使用 Docker 自托管。
+**Windows / macOS / Linux 桌面版已提供。** 前往 **[Releases 下载对应平台的安装包](https://github.com/Xiranwuxianxi/Baize/releases)**。桌面安装包内含前端、Python 后端和运行环境，使用者无需另外安装 Node.js 或 Python。也可以从源码运行 Web 版，或使用 Docker 自托管。
 
 [English](README.en.md) · [桌面版下载与使用](docs/desktop.md) · [协作方式](docs/orchestration.md) · [接入外部智能体](docs/external-agents.md) · [本地操作](docs/local-access.md) · [连接协议](docs/protocols.md) · [配置文件](docs/config.md) · [部署](docs/deployment.md) · [架构](docs/architecture.md) · [安全说明](SECURITY.md) · [参与贡献](CONTRIBUTING.md)
 
@@ -50,16 +50,16 @@
 
 ### 方式一：安装桌面版
 
-打开 [Desktop packages 构建页面](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml)，选择最近一次成功的运行，在页面底部 **Artifacts** 下载对应平台的压缩包。下载构建产物需要登录 GitHub。
+打开 **[Releases 下载页面](https://github.com/Xiranwuxianxi/Baize/releases)**，在最新发布版本的 **Assets** 中，按操作系统和 CPU 架构选择安装包：
 
-| 系统 | 应选择的产物 | 包内文件与使用方式 |
+| 系统 | 应选择的安装文件 | 使用方式 |
 | --- | --- | --- |
-| Windows x64 | `Baize-windows-x64` | `*-setup.exe` 为安装版，`*-portable.exe` 为免安装版，选择一个运行即可 |
-| macOS，Apple Silicon（M 系列） | `Baize-macos-arm64` | DMG 安装包和应用 ZIP；打开 DMG 后将 Baize 拖到 Applications |
-| macOS，Intel | `Baize-macos-x64` | DMG 安装包和应用 ZIP，使用方式同上 |
-| Linux x64 | `Baize-linux-x64` | AppImage / DEB |
+| Windows x64 | `*-windows-x64-setup.exe` / `*-windows-x64-portable.exe` | 安装版 / 免安装版，二选一即可 |
+| macOS，Apple Silicon（M 系列） | `*-macos-arm64.dmg` / `*-macos-arm64.zip` | 打开 DMG 后将 Baize 拖到 Applications，或解压应用 ZIP |
+| macOS，Intel | `*-macos-x64.dmg` / `*-macos-x64.zip` | 安装方式同上，请选择 Intel 版本 |
+| Linux x64 | `*-linux-x86_64.AppImage` / `*-linux-amd64.deb` | AppImage / Debian、Ubuntu 安装包 |
 
-构建产物保留 **30 天**，到期后可重新运行工作流生成。当前 Windows 包没有发行证书签名，macOS 包为临时签名、未经过 Apple 公证，系统可能提示来源未验证。完整的安装、更新、数据位置、构建与常见问题见 [桌面版指南](docs/desktop.md)。
+文件名中的 `*` 表示产品名和版本号。**`Source code (zip)` / `Source code (tar.gz)` 是源码，不是安装包。** 当前 Windows 包没有发行证书签名，macOS 包为临时签名、未经过 Apple 公证，系统可能提示来源未验证。完整的安装、更新、数据位置、构建与常见问题见 [桌面版指南](docs/desktop.md)。
 
 ### 第一次使用
 
