@@ -1,12 +1,14 @@
 # Only these application resources enter the frozen server. User files never do.
 from pathlib import Path
+import os
 
 root = Path(SPECPATH).parent
+version_file = os.environ.get('BAIZE_BUILD_VERSION_FILE') or str(root / 'VERSION')
 analysis = Analysis(
     [str(root / 'backend' / 'desktop_entry.py')],
     pathex=[str(root / 'backend')],
     binaries=[],
-    datas=[(str(root / 'VERSION'), '.'), (str(root / 'frontend' / 'dist'), 'frontend/dist')],
+    datas=[(version_file, '.'), (str(root / 'frontend' / 'dist'), 'frontend/dist')],
     hiddenimports=[
         'uvicorn.logging', 'uvicorn.loops.asyncio', 'uvicorn.protocols.http.h11_impl',
         'uvicorn.protocols.websockets.websockets_impl', 'uvicorn.lifespan.on',
