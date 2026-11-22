@@ -62,7 +62,7 @@ Linux 设置 `XDG_DATA_HOME` / `XDG_CONFIG_HOME` 时使用相应系统目录。`
 
 ## 一次构建全部桌面平台
 
-维护者可在 GitHub 的 **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow** 触发一次，即可同时生成：
+维护者可在 GitHub 的 **[Actions → Desktop packages](https://github.com/Xiranwuxianxi/Baize/actions/workflows/desktop.yml) → Run workflow** 中填写上一批打包的版本号，并选择 `small`（小更新）或 `big`（大更新）。一次选择用于同一批次的全部平台，即可同时生成：
 
 | 平台 | 架构 | 安装文件 |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ Linux 设置 `XDG_DATA_HOME` / `XDG_CONFIG_HOME` 时使用相应系统目录。`
 | Linux | x64 | AppImage / DEB |
 | macOS | Apple Silicon、Intel | 各自的 DMG、ZIP |
 
-推送 `v*` 标签也会触发构建。构建产物保存在该次运行的 Artifacts 中，保留 30 天；维护者将验证后的最终安装文件上传到 [Releases](https://github.com/Xiranwuxianxi/Baize/releases)，供用户按平台下载。安装文件不会提交到 Git 源码仓库。macOS 包使用临时签名，尚未经过 Apple 公证；Windows 包尚未使用发行证书签名。
+工作流仅手动触发，创建或推送标签不会自动打包。构建产物名称包含版本和北京时间，在该次运行的 Artifacts 中保留 30 天。**安装包由用户手动上传到 [Releases](https://github.com/Xiranwuxianxi/Baize/releases)，工作流不代为发布。** 重试同一批次时使用原来的上一版本号；新开一批时填写上次打包得到的版本号。安装文件不会提交到 Git 源码仓库。macOS 包使用临时签名，尚未经过 Apple 公证；Windows 包尚未使用发行证书签名。
 
 最终安装文件也会在对应系统上运行：Windows 检查安装、卸载、便携版权限和重复启动；两种 macOS 架构检查 DMG 安装、ZIP 解压及签名完整性；Linux 检查 AppImage 解包启动和 DEB 安装、卸载。每次启动都检查界面是否渲染并等待应用退出。
 
@@ -90,7 +90,18 @@ npm run smoke --prefix desktop
 
 `build` 自动安装前端依赖、构建前端、冻结后端并生成当前系统的安装文件。`npm run pack --prefix desktop` 只生成可运行的应用目录。指定构建解释器时，设置 `BAIZE_BUILD_PYTHON`。
 
-Node.js 至少需要 22.12。默认输出在项目根目录的 `release/`；可用 `BAIZE_DESKTOP_OUTPUT` 指定其他输出目录。构建结束后可运行 `node desktop/audit.cjs` 检查应用文件名单。
+每次运行 `build` 或 `pack` 都会先询问更新类型，并显示新旧版本；可输入 `q` 取消。版本起点已与发布记录统一为 `1.0.1`。规则如下：
+
+| 选择 | 规则 | 示例 |
+| --- | --- | --- |
+| 小更新 `small` | 最后一位加 1；9 后归零，中间一位加 1 | `1.2.8 → 1.2.9 → 1.3.0` |
+| 大更新 `big` | 第一位加 1，中间和最后一位归零 | `1.3.4 → 2.0.0` |
+
+中间一位不限制为单个数字，例如 `1.9.9 → 1.10.0`。成功打包后，本地的 `VERSION`、前后端包元数据和锁文件同步为新版本。安装包文件名和包内前后端使用同一个版本号。
+
+通过助手打包时，助手会先向用户询问，收到明确选择后才运行，例如用户已选择小更新时使用 `npm run build --prefix desktop -- --update small`。非交互环境缺少明确选择会停止，不会默认猜测。
+
+Node.js 至少需要 22.12。每批输出在独立目录，例如 `release/Baize-1.0.2_2026-11-22_17-35-40/`；时间使用北京时间（`Asia/Shanghai`，UTC+8），精确到秒，保留所有旧批次。同一秒重复打包会额外加编号以避免覆盖。可用 `BAIZE_DESKTOP_OUTPUT` 指定输出父目录，新批次仍会建立带版本和时间的子目录。`BUILD.json` 记录该批次的版本和时间。后续 `smoke`、安装检查和 `node desktop/audit.cjs` 自动读取最近一次成功打包的目录。
 
 Python 冻结产物依赖目标操作系统，因此完整三平台构建使用 GitHub 的 Windows、Linux 和 macOS 原生构建机，而不是在一台 Windows 机器上交叉冻结所有后端。
 
